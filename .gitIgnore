@@ -1,0 +1,4 @@
+logs/
+backend/logs/
+*.log
+*.gz

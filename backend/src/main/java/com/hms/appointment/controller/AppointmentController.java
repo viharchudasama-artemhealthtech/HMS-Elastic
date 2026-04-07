@@ -25,6 +25,7 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
     private final AppointmentMapper appointmentMapper;
 
+    // Summary APi End Point 
     @PreAuthorize("hasAnyRole('ADMIN','RECEPTIONIST','DOCTOR','NURSE')")
     @GetMapping("/summary")
     public ResponseEntity<ApiResponse<AppointmentSummaryDTO>> getSummary() {

@@ -8,8 +8,6 @@ import { PharmacyService } from '../../../../core/services/pharmacy.service';
 import { HeaderComponent } from '../../../../shared/components/layout/header/header.component';
 import { SidebarComponent } from '../../../../shared/components/layout/sidebar/sidebar.component';
 
-
-
 @Component({
   selector: 'app-inventory-log',
   standalone: true,

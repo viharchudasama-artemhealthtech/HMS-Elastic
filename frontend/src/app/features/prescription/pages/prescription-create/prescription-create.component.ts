@@ -128,15 +128,16 @@ export class PrescriptionCreateComponent implements OnInit {
   }
 
   private loadAppointmentDetails(): void {
-    this.appointmentService.getById(this.appointmentId!).subscribe((res: ApiResponse<Appointment>) => {
-      const appt = res.data;
-      if (appt) {
-        this.appointment = appt;
-        this.patientId = appt.patientId || null;
-        this.patientName = appt.patientName || '';
+    this.appointmentService.getById(this.appointmentId!).subscribe
+    ((res: ApiResponse<Appointment>) => {
+      const a = res.data;
+      if (a) {
+        this.appointment = a;
+        this.patientId = a.patientId || null;
+        this.patientName = a.patientName || '';
 
-        if (appt.doctorId) {
-          this.doctorId = appt.doctorId;
+        if (a.doctorId) {
+          this.doctorId = a.doctorId;
           this.cdr.markForCheck();
         } else {
           const user = this.authService.currentUser;

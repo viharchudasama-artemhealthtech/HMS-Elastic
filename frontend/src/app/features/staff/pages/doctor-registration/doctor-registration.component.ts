@@ -137,7 +137,7 @@ export class DoctorRegistrationComponent implements OnInit {
     this.doctorService.getById(id).subscribe({
       next: (res: ApiResponse<Doctor>) => {
         const doctor = res.data;
-        this.doctorForm.patchValue(buildDoctorFormPatch(doctor));
+        this.doctorForm.patchValue(buildDoctorFormPatch(doctor)); // patchValue allows partial updates, so we can skip disabled fields
 
         if (this.isViewMode) {
           this.doctorForm.disable();

@@ -34,10 +34,7 @@ export function getUrgencyClass(level: string): string {
   return `urgency-${level.toLowerCase()}`;
 }
 
-export function buildPatientRegistrationSuccessRoute(
-  isEditMode: boolean,
-  patient: Patient,
-): { path: string[]; queryParams?: Record<string, string | number> } {
+export function buildPatientRegistrationSuccessRoute(isEditMode: boolean,patient: Patient,): { path: string[]; queryParams?: Record<string, string | number> } {
   if (!isEditMode && patient.id) {
     return {
       path: ['/appointments/book'],

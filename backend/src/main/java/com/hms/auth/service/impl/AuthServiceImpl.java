@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
                     .userId(savedUser.getId())
                     .firstName(savedUser.getUsername())
                     .consultationFee(new BigDecimal("50.00"))
-                    .lastName("(Auto-Generated)")
+                    .lastName("General Doctor")
                     .specialization("General Medicine")
                     .department(Department.GENERAL_MEDICINE)
                     .registrationNumber("REG-" + savedUser.getId())

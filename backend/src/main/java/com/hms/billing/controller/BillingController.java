@@ -28,8 +28,7 @@ public class BillingController {
     public ResponseEntity<ApiResponse<BillingResponseDTO>> createBilling(
             @Valid @RequestBody BillingRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(
-                        billingService.createBilling(dto)));
+                .body(ApiResponse.success(billingService.createBilling(dto)));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','RECEPTIONIST')")

@@ -7,19 +7,11 @@ import java.util.List;
 
 public interface BillingService {
     BillingResponseDTO createBilling(BillingRequestDTO dto);
-
-
-
     BillingResponseDTO getBillingById(Long id);
-
     List<BillingResponseDTO> getAllBillings();
-
     List<BillingResponseDTO> getBillingsByPatientId(Long patientId);
-
     BillingResponseDTO updatePaymentStatus(Long id, PaymentStatus status);
-
     void deleteBilling(Long id);
-
     BillingResponseDTO generateBillingFromAppointment(Long appointmentId);
     BillingResponseDTO calculatePreviewBilling(Long appointmentId);
 }

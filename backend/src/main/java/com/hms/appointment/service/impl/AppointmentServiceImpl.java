@@ -183,13 +183,15 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         List<Appointment> doctorConflicts = appointmentRepository.findAndLockConflictingAppointments(doctorId, time,
                 ACTIVE_STATUSES);
-        if (doctorConflicts.stream().anyMatch(a -> !a.getId().equals(currentAppointmentId))) {
+        if (!doctorConflicts.isEmpty() && doctorConflicts.stream()
+                .anyMatch(a -> !a.getId().equals(currentAppointmentId))) {
             throw new SlotAlreadyBookedException("Doctor is already booked for " + time);
         }
 
         List<Appointment> patientConflicts = appointmentRepository.findAndLockPatientConflictingAppointments(patientId,
                 time, ACTIVE_STATUSES);
-        if (patientConflicts.stream().anyMatch(a -> !a.getId().equals(currentAppointmentId))) {
+        if (!patientConflicts.isEmpty() && patientConflicts.stream()
+                .anyMatch(a -> !a.getId().equals(currentAppointmentId))) {
             throw new SlotAlreadyBookedException("Patient already has an appointment for " + time);
         }
     }

@@ -1,5 +1,5 @@
 import { Chart, ChartConfiguration } from 'chart.js';
-import { Appointment, AppointmentStatus } from '../../../core/models/appointment.models';
+import { AppointmentStatus } from '../../../core/models/appointment.models';
 import { DashboardSummary, WeeklyStatistics } from '../../../core/models/common.models';
 
 export interface QuickAction {
@@ -82,9 +82,15 @@ const valueLabelPlugin = {
 
 export function createDashboardChart(ctx: CanvasRenderingContext2D, data: DashboardSummary): Chart {
   const stats: WeeklyStatistics[] = data.weeklyStats || [];
-  const labels = stats.map((s) => s.day);
-  const appointmentData = stats.map((s) => s.appointments || 0);
-  const patientData = stats.map((s) => s.patients || 0);
+  const { labels, appointmentData, patientData } = stats.reduce(
+    (acc, s) => {
+      acc.labels.push(s.day);
+      acc.appointmentData.push(s.appointments || 0);
+      acc.patientData.push(s.patients || 0);
+      return acc;
+    },
+    { labels: [] as string[], appointmentData: [] as number[], patientData: [] as number[] },
+  );
 
   const config: ChartConfiguration<'bar'> = {
     type: 'bar',
@@ -139,17 +145,31 @@ export function createDashboardChart(ctx: CanvasRenderingContext2D, data: Dashbo
 
 export function createDepartmentChart(ctx: CanvasRenderingContext2D, data: DashboardSummary): Chart {
   const stats = data.departmentStats || [];
-  const labels = stats.map((s) =>
-    s.department
-      .replace(/_/g, ' ')
-      .toLowerCase()
-      .replace(/\b\w/g, (char) => char.toUpperCase()),
+  const { labels, counts } = stats.reduce(
+    (acc, s) => {
+      acc.labels.push(
+        s.department
+          .replace(/_/g, ' ')
+          .toLowerCase()
+          .replace(/\b\w/g, (char) => char.toUpperCase()),
+      );
+      acc.counts.push(s.appointmentCount);
+      return acc;
+    },
+    { labels: [] as string[], counts: [] as number[] },
   );
-  const counts = stats.map((s) => s.appointmentCount);
 
   const colors = [
-    '#1d4ed8', '#0f766e', '#c2410c', '#be123c', '#6d28d9',
-    '#0f766e', '#0369a1', '#b45309', '#0f766e', '#4338ca'
+    '#1d4ed8',
+    '#0f766e',
+    '#c2410c',
+    '#be123c',
+    '#6d28d9',
+    '#0f766e',
+    '#0369a1',
+    '#b45309',
+    '#0f766e',
+    '#4338ca',
   ];
 
   const config: ChartConfiguration<'bar'> = {

@@ -163,7 +163,7 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
                 List<ValidationError> errors = ex.getBindingResult().getFieldErrors().stream()
                         .map(e -> new ValidationError(e.getField(), e.getDefaultMessage()))
-                        .collect(Collectors.toList());
+                        .toList();
 
                 log.warn("Validation failed for {}: {}", request.getRequestURI(), errors);
                 ApiError response = ApiError.of("Validation failed", HmsErrorCode.VALIDATION_FAILED.getCode(), HttpStatus.BAD_REQUEST);

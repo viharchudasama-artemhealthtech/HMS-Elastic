@@ -14,6 +14,7 @@ com\hms\doctor\dto\request\UpdateDoctorRequest.class
 com\hms\pharmacy\mapper\MedicineMapper.class
 com\hms\appointment\dto\response\AppointmentSummaryDTO$AppointmentSummaryDTOBuilder.class
 com\hms\HospitalManagementSystemApplication.class
+com\hms\pharmacy\repository\elasticsearch\MedicineSearchRepository.class
 com\hms\security\config\SecurityConfig.class
 com\hms\security\jwt\JwtAuthenticationFilter.class
 com\hms\common\response\ValidationError.class
@@ -29,6 +30,7 @@ com\hms\doctor\service\impl\DoctorServiceImpl.class
 com\hms\common\audit\AuditLog$AuditLogBuilder.class
 com\hms\security\config\JwtProperties.class
 com\hms\patient\service\PatientService.class
+com\hms\pharmacy\service\search\MedicineSearchService.class
 com\hms\patient\exception\PatientNotFoundException.class
 com\hms\pharmacy\dto\request\RestockMedicineRequestDTO$RestockMedicineRequestDTOBuilder.class
 com\hms\user\entity\User.class
@@ -40,11 +42,13 @@ com\hms\common\config\DataInitializer.class
 com\hms\common\config\JacksonConfig.class
 com\hms\doctor\dto\response\DoctorResponseDTO$DoctorResponseDTOBuilder.class
 com\hms\dashboard\controller\DashboardController.class
+com\hms\pharmacy\dto\response\MedicineSliceResponseDTO$MedicineSliceResponseDTOBuilder.class
 com\hms\billing\entity\Billing$BillingBuilderImpl.class
 com\hms\auth\service\impl\AuthServiceImpl.class
 com\hms\common\entity\BaseEntity.class
 com\hms\prescription\dto\response\PrescriptionResponseDTO.class
 com\hms\common\entity\Auditable$AuditableBuilder.class
+com\hms\pharmacy\dto\response\MedicineSliceResponseDTO.class
 com\hms\common\converter\BloodGroupConverter.class
 com\hms\doctor\dto\response\DoctorOnboardingResponse$DoctorOnboardingResponseBuilder.class
 com\hms\appointment\service\AppointmentService.class
@@ -111,6 +115,7 @@ com\hms\pharmacy\service\impl\MedicineServiceImpl.class
 com\hms\prescription\entity\Prescription$PrescriptionBuilder.class
 com\hms\billing\service\BillingService.class
 com\hms\doctor\entity\Doctor$DoctorBuilderImpl.class
+com\hms\pharmacy\config\MedicineSearchIndexConfig.class
 com\hms\pharmacy\dto\request\MedicineRequestDTO.class
 com\hms\appointment\entity\Appointment$AppointmentBuilder.class
 com\hms\appointment\exception\SlotAlreadyBookedException.class
@@ -126,6 +131,7 @@ com\hms\auth\entity\RevokedRefreshToken$RevokedRefreshTokenBuilder.class
 com\hms\auth\dto\request\RegisterRequest.class
 com\hms\billing\dto\response\BillingItemResponseDTO.class
 com\hms\pharmacy\dto\request\RestockMedicineRequestDTO.class
+com\hms\pharmacy\dto\response\MedicineSuggestionDTO$MedicineSuggestionDTOBuilder.class
 com\hms\billing\dto\request\BillingItemRequestDTO$BillingItemRequestDTOBuilder.class
 com\hms\pharmacy\repository\MedicineRepository.class
 com\hms\common\response\ApiError$ApiErrorBuilder.class
@@ -145,6 +151,7 @@ com\hms\prescription\dto\response\PrescriptionMedicineResponseDTO$PrescriptionMe
 com\hms\user\dto\UserResponseDTO$UserResponseDTOBuilder.class
 com\hms\security\config\AuditorAwareImpl.class
 com\hms\appointment\dto\request\AppointmentRequestDTO.class
+com\hms\pharmacy\entity\MedicineSearch$MedicineSearchBuilder.class
 com\hms\billing\entity\BillingItem$BillingItemBuilder.class
 com\hms\common\enums\Role.class
 com\hms\doctor\mapper\DoctorMapperImpl.class
@@ -160,6 +167,7 @@ com\hms\appointment\service\impl\AppointmentServiceImpl.class
 com\hms\prescription\mapper\PrescriptionMapperImpl.class
 com\hms\billing\dto\request\BillingRequestDTO$BillingRequestDTOBuilder.class
 com\hms\prescription\entity\Prescription.class
+com\hms\pharmacy\dto\response\MedicineSuggestionDTO.class
 com\hms\patient\controller\PatientController.class
 com\hms\billing\controller\BillingController.class
 com\hms\pharmacy\dto\request\DispenseMedicineRequestDTO$DispenseItemDTO.class
@@ -191,5 +199,6 @@ com\hms\pharmacy\entity\Medicine$MedicineBuilder.class
 com\hms\billing\repository\BillingRepository.class
 com\hms\user\exception\InvalidCredentialsException.class
 com\hms\appointment\controller\AppointmentController.class
+com\hms\pharmacy\entity\MedicineSearch.class
 com\hms\billing\dto\response\BillingResponseDTO.class
 com\hms\user\controller\UserController.class

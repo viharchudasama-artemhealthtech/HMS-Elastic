@@ -1,6 +1,7 @@
 package com.hms.prescription.controller;
 
 import com.hms.common.response.ApiResponse;
+import com.hms.pharmacy.dto.response.MedicineSuggestionDTO;
 import com.hms.prescription.dto.request.PrescriptionRequestDTO;
 import com.hms.prescription.dto.response.PrescriptionResponseDTO;
 import com.hms.prescription.service.PrescriptionService;
@@ -45,6 +46,15 @@ public class PrescriptionController {
             @PathVariable("patientId") Long patientId) {
         return ResponseEntity.ok(ApiResponse.success(
                 prescriptionService.getPrescriptionsByPatientId(patientId)));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PHARMACIST','NURSE')")
+    @GetMapping("/medicines/search")
+    public ResponseEntity<ApiResponse<List<MedicineSuggestionDTO>>> searchMedicinesForPrescription(
+            @RequestParam("q") String keyword) {
+        return ResponseEntity.ok(ApiResponse.success(
+                prescriptionService.searchPrescriptionMedicines(keyword),
+                "Prescription medicine search completed"));
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PHARMACIST')")

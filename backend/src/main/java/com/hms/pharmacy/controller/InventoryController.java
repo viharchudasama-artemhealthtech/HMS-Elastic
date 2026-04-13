@@ -2,7 +2,7 @@ package com.hms.pharmacy.controller;
 
 import com.hms.common.response.ApiResponse;
 import com.hms.pharmacy.dto.response.InventoryTransactionResponseDTO;
-import com.hms.pharmacy.service.MedicineService;
+import com.hms.pharmacy.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,12 +18,12 @@ import java.util.List;
 @PreAuthorize("hasAnyRole('ADMIN', 'PHARMACIST')")
 public class InventoryController {
 
-    private final MedicineService medicineService;
+    private final InventoryService inventoryService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List
             <InventoryTransactionResponseDTO>>> getAllTransactions() {
         return ResponseEntity.ok(ApiResponse
-                .success(medicineService.getAllTransactions()));
+                .success(inventoryService.getAllTransactions()));
     }
 }

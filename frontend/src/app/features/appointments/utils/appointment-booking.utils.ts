@@ -28,7 +28,11 @@ export function filterAvailableDoctors(doctors: Doctor[], department: string): D
 
   return doctors
     .filter((doctor) => doctor.department === department && doctor.isAvailable)
-    .sort((left, right) => `${left.firstName} ${left.lastName}`.localeCompare(`${right.firstName} ${right.lastName}`));
+    .sort((left, right) => {
+      const nameLeft = `${left.firstName} ${left.lastName}`;
+      const nameRight = `${right.firstName} ${right.lastName}`;
+      return nameLeft.localeCompare(nameRight);
+    });
 }
 
 export function buildDoctorOptions(doctors: Doctor[]): Array<SelectOption<number>> {

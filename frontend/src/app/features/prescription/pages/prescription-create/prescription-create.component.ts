@@ -1,18 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AutoCompleteModule } from 'primeng/autocomplete';
+import { debounceTime, distinctUntilChanged, finalize, of, Subject, switchMap, takeUntil } from 'rxjs';
 import { Appointment } from '../../../../core/models/appointment.models';
 import { ApiResponse } from '../../../../core/models/common.models';
 import { Doctor } from '../../../../core/models/doctor.models';
-import { Medicine } from '../../../../core/models/pharmacy.models';
+import { MedicineSuggestion } from '../../../../core/models/pharmacy.models';
 import { PrescriptionRequest } from '../../../../core/models/prescription.models';
 import { AppointmentService } from '../../../../core/services/appointment.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { DoctorService } from '../../../../core/services/doctor.service';
-import { PharmacyService } from '../../../../core/services/pharmacy.service';
 import { PrescriptionService } from '../../../../core/services/prescription.service';
 import { HeaderComponent } from '../../../../shared/components/layout/header/header.component';
 import { SidebarComponent } from '../../../../shared/components/layout/sidebar/sidebar.component';
@@ -22,7 +22,7 @@ import {
   createPrescriptionMedicineGroup,
   getPrescriptionMedicines,
 } from '../../utils/prescription-create-form';
-import { filterPrescriptionMedicines, findDoctorIdByUserEmail } from '../../utils/prescription-create.utils';
+import { findDoctorIdByUserEmail } from '../../utils/prescription-create.utils';
 
 @Component({
   selector: 'app-prescription-create',
@@ -40,8 +40,10 @@ export class PrescriptionCreateComponent implements OnInit {
   appointment?: Appointment;
   isSubmitting = false;
   errorMessage = '';
-  availableMedicines: Medicine[] = [];
-  filteredMedicines: Medicine[] = [];
+  medicineSuggestionsByRow: MedicineSuggestion[][] = [[]];
+  isSearchingMedicine = false;
+  private readonly destroy$ = new Subject<void>();
+  private readonly medicineSearchInputsByRow: Subject<string>[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -49,7 +51,6 @@ export class PrescriptionCreateComponent implements OnInit {
     private appointmentService: AppointmentService,
     private authService: AuthService,
     private doctorService: DoctorService,
-    private pharmacyService: PharmacyService,
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef,
@@ -61,24 +62,22 @@ export class PrescriptionCreateComponent implements OnInit {
     if (this.appointmentId) {
       this.loadAppointmentDetails();
     }
-    this.loadMedicines();
     this.initForm();
   }
 
-  private loadMedicines(): void {
-    this.pharmacyService.getActive().subscribe((res: ApiResponse<Medicine[]>) => {
-      this.availableMedicines = res.data;
-      this.filteredMedicines = [...this.availableMedicines];
-      this.cdr.markForCheck();
-    });
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.medicineSearchInputsByRow.forEach((stream) => stream.complete());
   }
 
-  filterMedicines(event: { query: string }): void {
-    this.filteredMedicines = filterPrescriptionMedicines(this.availableMedicines, event.query);
+  searchMedicines(event: { query: string }, index: number): void {
+    this.ensureMedicineSearchStream(index).next(event.query?.trim() ?? '');
   }
 
-  onMedicineSelect(event: { value: Medicine }, index: number): void {
-    const medicine = event.value as Medicine;
+  // Role of this method is to handle the case when user selects a medicine from the autocomplete dropdown.
+  onMedicineSelect(event: { value: MedicineSuggestion }, index: number): void {
+    const medicine = event.value as MedicineSuggestion;
     const medicineFormGroup = this.medicines.at(index) as FormGroup;
 
     // Auto-fill medicine name if it's an object (PrimeNG returns the object if selected from list)
@@ -86,8 +85,9 @@ export class PrescriptionCreateComponent implements OnInit {
       medicineFormGroup.patchValue({
         medicineName: medicine.name,
         medicineId: medicine.id,
-        availableStock: medicine.quantityInStock,
+        availableStock: medicine.stock,
       });
+      this.medicineSuggestionsByRow[index] = [];
       // Trigger quantity validation immediately
       medicineFormGroup.get('quantity')?.updateValueAndValidity();
     }
@@ -99,6 +99,7 @@ export class PrescriptionCreateComponent implements OnInit {
     const initialGroup = this.medicines.at(0) as FormGroup;
     initialGroup.get('dosage')?.valueChanges.subscribe(() => this.calculateQuantity(initialGroup));
     initialGroup.get('duration')?.valueChanges.subscribe(() => this.calculateQuantity(initialGroup));
+    this.ensureMedicineSearchStream(0);
   }
 
   get medicines(): FormArray {
@@ -119,12 +120,59 @@ export class PrescriptionCreateComponent implements OnInit {
 
   addMedicine(): void {
     this.medicines.push(this.createMedicineGroup());
+    this.medicineSuggestionsByRow.push([]);
+    this.ensureMedicineSearchStream(this.medicines.length - 1);
   }
 
   removeMedicine(index: number): void {
     if (this.medicines.length > 1) {
       this.medicines.removeAt(index);
+      this.medicineSuggestionsByRow.splice(index, 1);
+      this.medicineSearchInputsByRow.splice(index, 1);
     }
+  }
+
+  private ensureMedicineSearchStream(index: number): Subject<string> {
+    if (this.medicineSearchInputsByRow[index]) {
+      return this.medicineSearchInputsByRow[index];
+    }
+
+    const searchStream = new Subject<string>();
+    this.medicineSearchInputsByRow[index] = searchStream;
+
+    searchStream
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((keyword) => {
+          if (keyword.length < 2) {
+            this.medicineSuggestionsByRow[index] = [];
+            this.cdr.markForCheck();
+            return of<ApiResponse<MedicineSuggestion[]> | null>(null);
+          }
+
+          this.isSearchingMedicine = true;
+          return this.prescriptionService.searchMedicines(keyword).pipe(
+            finalize(() => {
+              this.isSearchingMedicine = false;
+              this.cdr.markForCheck();
+            }),
+          );
+        }),
+        takeUntil(this.destroy$),
+      )
+      .subscribe({
+        next: (res) => {
+          this.medicineSuggestionsByRow[index] = res?.data || [];
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.medicineSuggestionsByRow[index] = [];
+          this.cdr.markForCheck();
+        },
+      });
+
+    return searchStream;
   }
 
   private loadAppointmentDetails(): void {

@@ -120,3 +120,226 @@
   border-color: #ef4444;
   color: #ef4444;
 }
+
+.btn-reindex[disabled] {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.autocomplete-card {
+  margin-bottom: 24px;
+  padding: 24px;
+  border-radius: 20px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background:
+    radial-gradient(circle at top right, rgba(20, 184, 166, 0.14), transparent 36%),
+    linear-gradient(135deg, #f8fffe 0%, #f3f7ff 100%);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.autocomplete-copy {
+  margin-bottom: 18px;
+}
+
+.autocomplete-copy h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.autocomplete-copy p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.autocomplete-shell {
+  max-width: 720px;
+  position: relative;
+}
+
+.autocomplete-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.autocomplete-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.9);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.autocomplete-input-wrap.is-open,
+.autocomplete-input-wrap:focus-within {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+}
+
+.autocomplete-input-wrap.has-error {
+  border-color: #dc2626;
+}
+
+.autocomplete-input-wrap i {
+  color: #0f766e;
+  font-size: 18px;
+}
+
+.autocomplete-input-wrap input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 15px;
+}
+
+.clear-search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.16);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.autocomplete-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  min-height: 20px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.autocomplete-error {
+  color: #dc2626;
+}
+
+.autocomplete-dropdown {
+  margin-top: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: #ffffff;
+  box-shadow: 0 20px 36px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+}
+
+.suggestion-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: none;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover {
+  background: rgba(15, 118, 110, 0.06);
+}
+
+.suggestion-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.suggestion-name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.suggestion-name mark {
+  padding: 0;
+  background: linear-gradient(120deg, rgba(251, 191, 36, 0.45), rgba(250, 204, 21, 0.85));
+}
+
+.suggestion-brand {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.suggestion-stock,
+.selected-medicine span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #15803d;
+}
+
+.suggestion-stock.out-of-stock,
+.selected-medicine span.out-of-stock {
+  color: #dc2626;
+}
+
+.selected-medicine {
+  margin-top: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(15, 118, 110, 0.16);
+}
+
+.selected-medicine div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.selected-medicine strong {
+  color: #0f172a;
+}
+
+.selected-medicine div span {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.pagination-bar {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.pagination-bar span {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .autocomplete-card,
+  .form-card {
+    padding: 18px;
+  }
+
+  .pagination-bar {
+    justify-content: space-between;
+  }
+
+  .suggestion-item,
+  .selected-medicine {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

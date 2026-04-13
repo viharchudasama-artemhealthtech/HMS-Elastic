@@ -57,3 +57,19 @@ export interface InventoryTransaction {
   createdAt: string;
   createdBy: string;
 }
+
+export interface MedicineSuggestion {
+  id: number;
+  name: string;
+  brand: string;
+  stock: number;
+  inStock: boolean;
+}
+
+export interface MedicineSlice {
+  content: Medicine[];
+  page: number;
+  size: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}

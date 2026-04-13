@@ -18,6 +18,7 @@ C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\billing\repository
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\response\ValidationError.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\enums\BloodGroup.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\dashboard\controller\DashboardController.java
+C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\config\MedicineSearchIndexConfig.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\prescription\service\PrescriptionService.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\doctor\dto\request\CreateDoctorRequest.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\response\ApiError.java
@@ -36,6 +37,7 @@ C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\entity\Base
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\prescription\entity\Prescription.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\entity\Medicine.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\validation\ValidationPatterns.java
+C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\service\InventoryService.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\dashboard\service\impl\DashboardServiceImpl.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\prescription\mapper\PrescriptionMapper.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\user\service\UserService.java
@@ -56,8 +58,10 @@ C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\repositor
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\appointment\service\impl\AppointmentServiceImpl.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\appointment\controller\AppointmentController.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\converter\BloodGroupConverter.java
+C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\entity\MedicineSearch.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\user\service\CustomUserDetailsService.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\enums\UrgencyLevel.java
+C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\dto\response\MedicineSliceResponseDTO.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\user\exception\EmailAlreadyExistsException.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\user\repository\UserRepository.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\doctor\dto\request\UpdateDoctorRequest.java
@@ -89,12 +93,14 @@ C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\security\jwt\Cooki
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\auth\dto\request\LoginRequest.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\prescription\repository\PrescriptionRepository.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\auth\dto\request\TokenRefreshRequest.java
+C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\dto\response\MedicineSuggestionDTO.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\security\config\SecurityConfig.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\billing\entity\Billing.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\billing\exception\BillingNotFoundException.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\enums\PaymentMethod.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\prescription\entity\PrescriptionMedicine.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\user\exception\UsernameAlreadyExistsException.java
+C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\repository\elasticsearch\MedicineSearchRepository.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\appointment\service\AppointmentService.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\billing\mapper\BillingMapper.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\controller\InventoryController.java
@@ -123,11 +129,13 @@ C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\patient\mapper\Pat
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\dto\request\DispenseMedicineRequestDTO.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\user\controller\UserController.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\config\CorsConfig.java
+C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\service\impl\InventoryServiceImpl.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\service\impl\MedicineServiceImpl.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\auth\repository\RevokedRefreshTokenRepository.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\entity\Auditable.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\exception\GlobalExceptionHandler.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\dto\response\InventoryTransactionResponseDTO.java
+C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\service\search\MedicineSearchService.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\patient\service\PatientService.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\patient\dto\request\PatientRequestDTO.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\audit\AuditLogService.java

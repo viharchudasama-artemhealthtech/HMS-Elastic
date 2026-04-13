@@ -19,6 +19,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
     ...(accessToken ? { setHeaders: { Authorization: `Bearer ${accessToken}` } } : {}),
   });
 
+  // switchmap is RsJX observable whenever new values comes in and cancels the previous one 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401 && !isRefreshRequest && !isLoginRequest && !hasRetried) {

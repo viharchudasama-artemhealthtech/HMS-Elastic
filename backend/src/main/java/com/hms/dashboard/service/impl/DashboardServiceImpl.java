@@ -65,31 +65,28 @@ public class DashboardServiceImpl implements DashboardService {
 
                 long totalConsultations = appointmentRepository.countByStatus(AppointmentStatus.COMPLETED);
 
-                List<WeeklyStatisticsDTO> weeklyStats = new ArrayList<>();
-                // Generate a 7-day window centered on today (-3 to +3 days)
-                for (int i = -3; i <= 3; i++) {
-                        LocalDate date = LocalDate.now().plusDays(i);
-                        LocalDateTime start = LocalDateTime.of(date, LocalTime.MIN);
-                        LocalDateTime end = LocalDateTime.of(date, LocalTime.MAX);
-
-                        weeklyStats.add(WeeklyStatisticsDTO.builder()
-                                        .day(date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH))
-                                        .appointments(appointmentRepository.countByAppointmentTimeBetween(start, end))
-                                        .patients(patientRepository.countByCreatedAtBetween(start, end))
-                                        .build());
-                }
+                List<WeeklyStatisticsDTO> weeklyStats = java.util.stream.IntStream.rangeClosed(-3, 3)
+                        .mapToObj(i -> {
+                            LocalDate date = LocalDate.now().plusDays(i);
+                            LocalDateTime start = LocalDateTime.of(date, LocalTime.MIN);
+                            LocalDateTime end = LocalDateTime.of(date, LocalTime.MAX);
+                            return WeeklyStatisticsDTO.builder()
+                                    .day(date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH))
+                                    .appointments(appointmentRepository.countByAppointmentTimeBetween(start, end))
+                                    .patients(patientRepository.countByCreatedAtBetween(start, end))
+                                    .build();
+                        })
+                        .toList();
 
                 // Generate department-wise stats
-                List<DepartmentStatisticsDTO> deptStats = new ArrayList<>();
-                for (Department dept : Department.values()) {
-                        long count = appointmentRepository.countByDepartment(dept);
-                        if (count > 0) {
-                                deptStats.add(DepartmentStatisticsDTO.builder()
-                                                .department(dept.name())
-                                                .appointmentCount(count)
-                                                .build());
-                        }
-                }
+                List<DepartmentStatisticsDTO> deptStats = java.util.Arrays.stream(Department.values())
+                        .map(dept -> new java.util.AbstractMap.SimpleEntry<>(dept, appointmentRepository.countByDepartment(dept)))
+                        .filter(entry -> entry.getValue() > 0)
+                        .map(entry -> DepartmentStatisticsDTO.builder()
+                                .department(entry.getKey().name())
+                                .appointmentCount(entry.getValue())
+                                .build())
+                        .toList();
 
                 return DashboardSummaryDTO.builder()
                                 .totalPatients(totalPatients)

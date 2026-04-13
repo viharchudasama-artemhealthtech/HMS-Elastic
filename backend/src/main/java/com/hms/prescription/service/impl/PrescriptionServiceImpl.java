@@ -13,10 +13,12 @@ import com.hms.patient.exception.PatientNotFoundException;
 import com.hms.patient.repository.PatientRepository;
 import com.hms.pharmacy.entity.InventoryTransaction;
 import com.hms.pharmacy.entity.Medicine;
+import com.hms.pharmacy.dto.response.MedicineSuggestionDTO;
 import com.hms.pharmacy.exception.InsufficientStockException;
 import com.hms.pharmacy.exception.MedicineNotFoundException;
 import com.hms.pharmacy.repository.InventoryTransactionRepository;
 import com.hms.pharmacy.repository.MedicineRepository;
+import com.hms.pharmacy.service.search.MedicineSearchService;
 import com.hms.prescription.dto.request.PrescriptionMedicineRequestDTO;
 import com.hms.prescription.dto.request.PrescriptionRequestDTO;
 import com.hms.prescription.dto.response.PrescriptionResponseDTO;
@@ -51,6 +53,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     private final MedicineRepository medicineRepository;
     private final InventoryTransactionRepository inventoryTransactionRepository;
     private final AuditLogService auditLogService;
+    private final MedicineSearchService medicineSearchService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -148,6 +151,12 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             checkOwnership(prescriptions.get(0));
         }
         return prescriptionMapper.toDtoList(prescriptions);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MedicineSuggestionDTO> searchPrescriptionMedicines(String keyword) {
+        return medicineSearchService.searchMedicines(keyword);
     }
 
     @Override

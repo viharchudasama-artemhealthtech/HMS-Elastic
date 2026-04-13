@@ -192,7 +192,6 @@ public class BillingServiceImpl implements BillingService {
         billing.setBillingDate(LocalDateTime.now());
         billing.setPaymentMethod(PaymentMethod.CASH);
         billing.setPaymentStatus(PaymentStatus.UNPAID);
-        billing.setItems(new ArrayList<>());
 
         BigDecimal rate = (this.taxRate != null) ?
                 this.taxRate : new BigDecimal("0.05");

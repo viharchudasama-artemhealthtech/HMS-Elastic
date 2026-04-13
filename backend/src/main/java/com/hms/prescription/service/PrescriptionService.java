@@ -1,5 +1,6 @@
 package com.hms.prescription.service;
 
+import com.hms.pharmacy.dto.response.MedicineSuggestionDTO;
 import com.hms.prescription.dto.request.PrescriptionRequestDTO;
 import com.hms.prescription.dto.response.PrescriptionResponseDTO;
 
@@ -14,6 +15,8 @@ public interface PrescriptionService {
     List<PrescriptionResponseDTO> getAllPrescriptions();
 
     List<PrescriptionResponseDTO> getPrescriptionsByPatientId(Long patientId);
+
+    List<MedicineSuggestionDTO> searchPrescriptionMedicines(String keyword);
 
     void deletePrescription(Long id);
 }

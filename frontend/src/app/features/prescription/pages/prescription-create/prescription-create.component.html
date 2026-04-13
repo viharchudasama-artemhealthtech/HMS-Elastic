@@ -104,8 +104,8 @@
                       <p-autoComplete
                         [inputId]="'medName' + i"
                         formControlName="medicineName"
-                        [suggestions]="filteredMedicines"
-                        (completeMethod)="filterMedicines($event)"
+                        [suggestions]="medicineSuggestionsByRow[i] || []"
+                        (completeMethod)="searchMedicines($event, i)"
                         (onSelect)="onMedicineSelect($event, i)"
                         field="name"
                         placeholder="Search medicines by name or code..."
@@ -114,25 +114,17 @@
                       >
                         <ng-template let-med pTemplate="item">
                           <div class="med-option">
-                            <span class="med-name">{{ med.name }} - {{ med.medicineCode }}</span>
+                            <span class="med-name">{{ med.name }}</span>
                             <div class="med-stock">
-                              <i
-                                class="ri-checkbox-circle-line in-stock"
-                                *ngIf="med.quantityInStock > med.reorderLevel"
-                              ></i>
-                              <i
-                                class="ri-error-warning-line low-stock"
-                                *ngIf="med.quantityInStock <= med.reorderLevel && med.quantityInStock > 0"
-                              ></i>
-                              <i class="ri-close-circle-line out-of-stock" *ngIf="med.quantityInStock <= 0"></i>
+                              <i class="ri-checkbox-circle-line in-stock" *ngIf="med.inStock"></i>
+                              <i class="ri-close-circle-line out-of-stock" *ngIf="!med.inStock"></i>
                               <span
                                 [ngClass]="{
-                                  'in-stock': med.quantityInStock > med.reorderLevel,
-                                  'low-stock': med.quantityInStock <= med.reorderLevel && med.quantityInStock > 0,
-                                  'out-of-stock': med.quantityInStock <= 0,
+                                  'in-stock': med.inStock,
+                                  'out-of-stock': !med.inStock,
                                 }"
                               >
-                                In Stock: {{ med.quantityInStock }} ({{ med.category }})
+                                {{ med.brand || 'Generic' }} • Stock: {{ med.stock }}
                               </span>
                             </div>
                           </div>

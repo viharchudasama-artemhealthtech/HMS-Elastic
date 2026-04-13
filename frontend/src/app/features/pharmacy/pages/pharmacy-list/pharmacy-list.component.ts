@@ -1,17 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CalendarModule } from 'primeng/calendar';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { TableModule } from 'primeng/table';
+import { Subject, debounceTime, distinctUntilChanged, finalize, of, switchMap, takeUntil } from 'rxjs';
 import { ApiResponse } from '../../../../core/models/common.models';
-import { Medicine, MedicineCategory } from '../../../../core/models/pharmacy.models';
+import { Medicine, MedicineCategory, MedicineSlice, MedicineSuggestion } from '../../../../core/models/pharmacy.models';
 import { AuthService } from '../../../../core/services/auth.service';
-import { PharmacyService } from '../../../../core/services/pharmacy.service';
+import { InventoryService } from '../../../../core/services/inventory.service';
+import { MedicineSearchService } from '../../../../core/services/medicine-search.service';
+import { MedicineService } from '../../../../core/services/medicine.service';
 import { HeaderComponent } from '../../../../shared/components/layout/header/header.component';
 import { SidebarComponent } from '../../../../shared/components/layout/sidebar/sidebar.component';
 import { createMedicineForm, createRestockForm } from '../../utils/pharmacy-list-form';
@@ -40,9 +43,15 @@ import {
   templateUrl: './pharmacy-list.component.html',
   styleUrl: './pharmacy-list.component.scss',
 })
-export class PharmacyListComponent implements OnInit {
+export class PharmacyListComponent implements OnInit, OnDestroy {
   medicines: Medicine[] = [];
   filteredMedicines: Medicine[] = [];
+  searchMatchedMedicineIds = new Set<string>();
+  searchControl = new FormControl('', { nonNullable: true });
+  searchSuggestions: MedicineSuggestion[] = [];
+  selectedSuggestion: MedicineSuggestion | null = null;
+  isSearching = false;
+  searchError = '';
   isLoading = true;
   userRole: string | null = null;
   showAddForm = false;
@@ -53,15 +62,23 @@ export class PharmacyListComponent implements OnInit {
   medicineForm!: FormGroup;
   restockForm!: FormGroup;
   isSubmitting = false;
+  isReindexing = false;
   errorMessage = '';
   successMessage = '';
   showLowStockOnly = false;
   minExpiryDate: Date = new Date();
+  currentPage = 0;
+  readonly pageSize = 10;
+  hasNextPage = false;
+  hasPreviousPage = false;
 
   categories = Object.values(MedicineCategory);
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
-    private pharmacyService: PharmacyService,
+    private medicineService: MedicineService,
+    private inventoryService: InventoryService,
+    private medicineSearchService: MedicineSearchService,
     private authService: AuthService,
     private fb: FormBuilder,
   ) {}
@@ -70,7 +87,13 @@ export class PharmacyListComponent implements OnInit {
     this.userRole = this.authService.getUserRole();
     this.initForm();
     this.calculateMinDate();
+    this.initAutocomplete();
     this.loadMedicines();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   calculateMinDate(): void {
@@ -83,11 +106,56 @@ export class PharmacyListComponent implements OnInit {
     this.restockForm = createRestockForm(this.fb);
   }
 
+  initAutocomplete(): void {
+    this.searchControl.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((value) => {
+          const keyword = value.trim();
+          this.searchError = '';
+          this.selectedSuggestion = null;
+
+          if (keyword.length < 2) {
+            this.searchSuggestions = [];
+            this.searchMatchedMedicineIds.clear();
+            this.applyFilter();
+            this.isSearching = false;
+            return of(null);
+          }
+
+          this.isSearching = true;
+          return this.medicineSearchService.search(keyword).pipe(
+            finalize(() => {
+              this.isSearching = false;
+            }),
+          );
+        }),
+        takeUntil(this.destroy$),
+      )
+      .subscribe({
+        next: (response) => {
+          this.searchSuggestions = response?.data || [];
+          this.syncTableWithSearchResults(this.searchSuggestions);
+        },
+        error: (error: string) => {
+          this.searchSuggestions = [];
+          this.searchMatchedMedicineIds.clear();
+          this.applyFilter();
+          this.searchError = error || 'Unable to fetch medicine suggestions.';
+        },
+      });
+  }
+
   loadMedicines(): void {
     this.isLoading = true;
-    this.pharmacyService.getAll().subscribe({
-      next: (res: ApiResponse<Medicine[]>) => {
-        this.medicines = res.data || [];
+    this.medicineService.getPaged(this.currentPage, this.pageSize).subscribe({
+      next: (res: ApiResponse<MedicineSlice>) => {
+        const pageData = res.data;
+        this.medicines = pageData?.content || [];
+        this.currentPage = pageData?.page ?? this.currentPage;
+        this.hasNextPage = pageData?.hasNext ?? false;
+        this.hasPreviousPage = pageData?.hasPrevious ?? false;
         this.applyFilter();
         this.isLoading = false;
       },
@@ -98,12 +166,100 @@ export class PharmacyListComponent implements OnInit {
   }
 
   applyFilter(): void {
-    this.filteredMedicines = filterMedicinesByLowStock(this.medicines, this.showLowStockOnly);
+    const baseMedicines = filterMedicinesByLowStock(this.medicines, this.showLowStockOnly);
+    const keyword = this.searchControl.value.trim();
+
+    if (keyword.length >= 2) {
+      this.filteredMedicines = baseMedicines.filter((medicine) =>
+        this.searchMatchedMedicineIds.has(String(medicine.id)),
+      );
+      return;
+    }
+
+    this.filteredMedicines = baseMedicines;
   }
 
   toggleLowStock(): void {
     this.showLowStockOnly = !this.showLowStockOnly;
     this.applyFilter();
+  }
+
+  goToNextPage(): void {
+    if (!this.hasNextPage || this.isLoading) {
+      return;
+    }
+
+    this.currentPage += 1;
+    this.loadMedicines();
+  }
+
+  goToPreviousPage(): void {
+    if (!this.hasPreviousPage || this.isLoading) {
+      return;
+    }
+
+    this.currentPage -= 1;
+    this.loadMedicines();
+  }
+
+  reindexMedicines(): void {
+    this.isReindexing = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.medicineSearchService.reindex().subscribe({
+      next: (res) => {
+        this.successMessage = res.message || 'Medicines reindexed successfully.';
+        this.isReindexing = false;
+      },
+      error: (err: HttpErrorResponse) => {
+        this.errorMessage = err.error?.message || 'Reindex failed.';
+        this.isReindexing = false;
+      },
+    });
+  }
+
+  selectSuggestion(suggestion: MedicineSuggestion): void {
+    this.selectedSuggestion = suggestion;
+    this.searchSuggestions = [];
+    this.searchControl.setValue(suggestion.name, { emitEvent: false });
+    this.searchMatchedMedicineIds = new Set([String(suggestion.id)]);
+    this.applyFilter();
+  }
+
+  clearSearch(): void {
+    this.searchControl.setValue('', { emitEvent: false });
+    this.selectedSuggestion = null;
+    this.searchSuggestions = [];
+    this.searchMatchedMedicineIds.clear();
+    this.applyFilter();
+    this.searchError = '';
+    this.isSearching = false;
+  }
+
+  private syncTableWithSearchResults(suggestions: MedicineSuggestion[]): void {
+    this.searchMatchedMedicineIds = new Set(suggestions.map((s) => String(s.id)));
+    this.applyFilter();
+  }
+
+  highlightMatch(name: string): string {
+    const query = this.searchControl.value.trim();
+    if (!query) {
+      return this.escapeHtml(name);
+    }
+
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedQuery})`, 'ig');
+    return this.escapeHtml(name).replace(regex, '<mark>$1</mark>');
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   openAddForm(): void {
@@ -170,7 +326,7 @@ export class PharmacyListComponent implements OnInit {
     };
 
     if (this.showEditForm && this.editingMedicine) {
-      this.pharmacyService.update(this.editingMedicine.id, payload).subscribe({
+      this.medicineService.update(this.editingMedicine.id, payload).subscribe({
         next: () => {
           this.successMessage = 'Medicine updated successfully!';
           this.isSubmitting = false;
@@ -183,7 +339,7 @@ export class PharmacyListComponent implements OnInit {
         },
       });
     } else {
-      this.pharmacyService.create(payload).subscribe({
+      this.medicineService.create(payload).subscribe({
         next: () => {
           this.successMessage = 'Medicine added successfully!';
           this.isSubmitting = false;
@@ -206,7 +362,7 @@ export class PharmacyListComponent implements OnInit {
     this.isSubmitting = true;
     const quantity = this.restockForm.value.quantity;
 
-    this.pharmacyService.restock(this.restockingMedicine.id, quantity).subscribe({
+    this.inventoryService.restock(this.restockingMedicine.id, quantity).subscribe({
       next: () => {
         this.successMessage = `Restocked ${this.restockingMedicine!.name} with ${quantity} units!`;
         this.isSubmitting = false;
@@ -222,7 +378,7 @@ export class PharmacyListComponent implements OnInit {
 
   onDelete(id: number): void {
     if (!confirm('Delete this medicine?')) return;
-    this.pharmacyService.delete(id).subscribe({
+    this.medicineService.delete(id).subscribe({
       next: () => {
         this.loadMedicines();
       },

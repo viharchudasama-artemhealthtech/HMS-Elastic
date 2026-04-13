@@ -4,7 +4,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { ApiResponse } from '../../../../core/models/common.models';
 import { InventoryTransaction } from '../../../../core/models/pharmacy.models';
-import { PharmacyService } from '../../../../core/services/pharmacy.service';
+import { InventoryService } from '../../../../core/services/inventory.service';
 import { HeaderComponent } from '../../../../shared/components/layout/header/header.component';
 import { SidebarComponent } from '../../../../shared/components/layout/sidebar/sidebar.component';
 
@@ -16,12 +16,11 @@ import { SidebarComponent } from '../../../../shared/components/layout/sidebar/s
   styleUrl: './inventory-log.component.scss',
 })
 export class InventoryLogComponent implements OnInit {
-  
   transactions: InventoryTransaction[] = [];
   filteredTransactions: InventoryTransaction[] = [];
   isLoading = true;
 
-  constructor(private pharmacyService: PharmacyService) {}
+  constructor(private inventoryService: InventoryService) {}
 
   ngOnInit(): void {
     this.loadTransactions();
@@ -29,7 +28,7 @@ export class InventoryLogComponent implements OnInit {
 
   loadTransactions(): void {
     this.isLoading = true;
-    this.pharmacyService.getInventoryLog().subscribe({
+    this.inventoryService.getInventoryLog().subscribe({
       next: (res: ApiResponse<InventoryTransaction[]>) => {
         this.transactions = res.data;
         this.applyFilter();
@@ -41,7 +40,7 @@ export class InventoryLogComponent implements OnInit {
     });
   }
 
- // Placeholder for filter logic - currently just copies all transactions to filteredTransactions
+  // Placeholder for filter logic - currently just copies all transactions to filteredTransactions
   applyFilter(): void {
     this.filteredTransactions = this.transactions;
   }

@@ -11,6 +11,15 @@
           <p>Manage medicines, stock levels and dispensing</p>
         </div>
         <div class="header-actions">
+          <button
+            class="btn-outline btn-reindex"
+            *ngIf="userRole === 'ADMIN' || userRole === 'PHARMACIST'"
+            (click)="reindexMedicines()"
+            [disabled]="isReindexing"
+          >
+            <i class="ri-refresh-line"></i>
+            {{ isReindexing ? 'Reindexing...' : 'Reindex Search' }}
+          </button>
           <button class="btn-outline" [class.active]="showLowStockOnly" (click)="toggleLowStock()">
             <i class="ri-alarm-warning-line"></i>
             {{ showLowStockOnly ? 'All Medicines' : 'Low Stock' }}
@@ -25,6 +34,63 @@
         <i class="ri-checkbox-circle-line"></i> {{ successMessage }}
       </div>
       <div class="error-alert" *ngIf="errorMessage"><i class="ri-error-warning-line"></i> {{ errorMessage }}</div>
+
+      <section class="autocomplete-card">
+        <div class="autocomplete-copy">
+          <h2>Medicine autocomplete</h2>
+          <p>Search medicine names with fuzzy matching, fast suggestions, and live stock visibility.</p>
+        </div>
+
+        <div class="autocomplete-shell">
+          <label class="autocomplete-label" for="medicine-search">Search medicines</label>
+          <div class="autocomplete-input-wrap" [class.is-open]="searchSuggestions.length > 0" [class.has-error]="!!searchError">
+            <i class="ri-search-line"></i>
+            <input
+              id="medicine-search"
+              type="text"
+              [formControl]="searchControl"
+              autocomplete="off"
+              placeholder="Start typing a medicine name..."
+            />
+            <button type="button" class="clear-search-btn" *ngIf="searchControl.value" (click)="clearSearch()">
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+
+          <div class="autocomplete-meta">
+            <span *ngIf="isSearching">Searching...</span>
+            <span *ngIf="!isSearching && !searchError">Top 10 matches, fuzzy enabled</span>
+            <span class="autocomplete-error" *ngIf="searchError">{{ searchError }}</span>
+          </div>
+
+          <div class="autocomplete-dropdown" *ngIf="searchSuggestions.length > 0">
+            <button
+              type="button"
+              class="suggestion-item"
+              *ngFor="let suggestion of searchSuggestions"
+              (click)="selectSuggestion(suggestion)"
+            >
+              <div class="suggestion-main">
+                <span class="suggestion-name" [innerHTML]="highlightMatch(suggestion.name)"></span>
+                <span class="suggestion-brand">{{ suggestion.brand || 'Generic' }}</span>
+              </div>
+              <span class="suggestion-stock" [class.out-of-stock]="!suggestion.inStock">
+                {{ suggestion.inStock ? suggestion.stock + ' in stock' : 'Out of stock' }}
+              </span>
+            </button>
+          </div>
+
+          <div class="selected-medicine" *ngIf="selectedSuggestion">
+            <div>
+              <strong>{{ selectedSuggestion.name }}</strong>
+              <span>{{ selectedSuggestion.brand || 'Generic brand' }}</span>
+            </div>
+            <span [class.out-of-stock]="!selectedSuggestion.inStock">
+              {{ selectedSuggestion.inStock ? selectedSuggestion.stock + ' units available' : 'Out of stock' }}
+            </span>
+          </div>
+        </div>
+      </section>
 
 
 
@@ -230,6 +296,16 @@
               </tr>
             </ng-template>
           </p-table>
+
+          <div class="pagination-bar" *ngIf="!searchControl.value.trim()">
+            <button type="button" class="btn-outline" (click)="goToPreviousPage()" [disabled]="!hasPreviousPage || isLoading">
+              Previous
+            </button>
+            <span>Page {{ currentPage + 1 }}</span>
+            <button type="button" class="btn-outline" (click)="goToNextPage()" [disabled]="!hasNextPage || isLoading">
+              Next
+            </button>
+          </div>
         </div>
 
         <div class="loading-state" *ngIf="isLoading">

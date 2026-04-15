@@ -7,15 +7,14 @@ import com.hms.doctor.dto.response.DoctorResponseDTO;
 import com.hms.doctor.entity.Doctor;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
-/*
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-04-14T18:46:08+0530",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260224-0835, environment: Java 21.0.10 (Eclipse Adoptium)"
+    date = "2026-04-15T17:27:19+0530",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.10 (Eclipse Adoptium)"
 )
-*/
 @Component
 public class DoctorMapperImpl implements DoctorMapper {
 
@@ -27,22 +26,22 @@ public class DoctorMapperImpl implements DoctorMapper {
 
         Doctor doctor = new Doctor();
 
+        doctor.setUserId( dto.getUserId() );
+        doctor.setFirstName( dto.getFirstName() );
+        doctor.setLastName( dto.getLastName() );
+        doctor.setSpecialization( dto.getSpecialization() );
+        doctor.setEmail( dto.getEmail() );
         doctor.setBio( dto.getBio() );
-        doctor.setConsultationFee( dto.getConsultationFee() );
         if ( dto.getDepartment() != null ) {
             doctor.setDepartment( Enum.valueOf( Department.class, dto.getDepartment() ) );
         }
-        doctor.setDesignation( dto.getDesignation() );
-        doctor.setEmail( dto.getEmail() );
-        doctor.setExperienceYears( dto.getExperienceYears() );
-        doctor.setFirstName( dto.getFirstName() );
-        doctor.setIsAvailable( dto.getIsAvailable() );
-        doctor.setLastName( dto.getLastName() );
-        doctor.setLicenseNumber( dto.getLicenseNumber() );
-        doctor.setPhoneNumber( dto.getPhoneNumber() );
         doctor.setQualification( dto.getQualification() );
-        doctor.setSpecialization( dto.getSpecialization() );
-        doctor.setUserId( dto.getUserId() );
+        doctor.setExperienceYears( dto.getExperienceYears() );
+        doctor.setLicenseNumber( dto.getLicenseNumber() );
+        doctor.setConsultationFee( dto.getConsultationFee() );
+        doctor.setIsAvailable( dto.getIsAvailable() );
+        doctor.setPhoneNumber( dto.getPhoneNumber() );
+        doctor.setDesignation( dto.getDesignation() );
 
         return doctor;
     }
@@ -55,23 +54,23 @@ public class DoctorMapperImpl implements DoctorMapper {
 
         DoctorResponseDTO doctorResponseDTO = new DoctorResponseDTO();
 
-        doctorResponseDTO.setBio( entity.getBio() );
-        doctorResponseDTO.setConsultationFee( entity.getConsultationFee() );
+        doctorResponseDTO.setId( entity.getId() );
+        doctorResponseDTO.setFirstName( entity.getFirstName() );
+        doctorResponseDTO.setLastName( entity.getLastName() );
+        doctorResponseDTO.setSpecialization( entity.getSpecialization() );
+        doctorResponseDTO.setRegistrationNumber( entity.getRegistrationNumber() );
         if ( entity.getDepartment() != null ) {
             doctorResponseDTO.setDepartment( entity.getDepartment().name() );
         }
-        doctorResponseDTO.setDesignation( entity.getDesignation() );
         doctorResponseDTO.setEmail( entity.getEmail() );
-        doctorResponseDTO.setExperienceYears( entity.getExperienceYears() );
-        doctorResponseDTO.setFirstName( entity.getFirstName() );
-        doctorResponseDTO.setId( entity.getId() );
-        doctorResponseDTO.setIsAvailable( entity.getIsAvailable() );
-        doctorResponseDTO.setLastName( entity.getLastName() );
-        doctorResponseDTO.setLicenseNumber( entity.getLicenseNumber() );
-        doctorResponseDTO.setPhoneNumber( entity.getPhoneNumber() );
+        doctorResponseDTO.setBio( entity.getBio() );
         doctorResponseDTO.setQualification( entity.getQualification() );
-        doctorResponseDTO.setRegistrationNumber( entity.getRegistrationNumber() );
-        doctorResponseDTO.setSpecialization( entity.getSpecialization() );
+        doctorResponseDTO.setExperienceYears( entity.getExperienceYears() );
+        doctorResponseDTO.setLicenseNumber( entity.getLicenseNumber() );
+        doctorResponseDTO.setConsultationFee( entity.getConsultationFee() );
+        doctorResponseDTO.setIsAvailable( entity.getIsAvailable() );
+        doctorResponseDTO.setPhoneNumber( entity.getPhoneNumber() );
+        doctorResponseDTO.setDesignation( entity.getDesignation() );
 
         return doctorResponseDTO;
     }
@@ -82,23 +81,23 @@ public class DoctorMapperImpl implements DoctorMapper {
             return;
         }
 
+        entity.setFirstName( dto.getFirstName() );
+        entity.setLastName( dto.getLastName() );
+        entity.setSpecialization( dto.getSpecialization() );
         entity.setBio( dto.getBio() );
-        entity.setConsultationFee( dto.getConsultationFee() );
         if ( dto.getDepartment() != null ) {
             entity.setDepartment( Enum.valueOf( Department.class, dto.getDepartment() ) );
         }
         else {
             entity.setDepartment( null );
         }
-        entity.setDesignation( dto.getDesignation() );
-        entity.setExperienceYears( dto.getExperienceYears() );
-        entity.setFirstName( dto.getFirstName() );
-        entity.setIsAvailable( dto.getIsAvailable() );
-        entity.setLastName( dto.getLastName() );
-        entity.setLicenseNumber( dto.getLicenseNumber() );
-        entity.setPhoneNumber( dto.getPhoneNumber() );
         entity.setQualification( dto.getQualification() );
-        entity.setSpecialization( dto.getSpecialization() );
+        entity.setExperienceYears( dto.getExperienceYears() );
+        entity.setLicenseNumber( dto.getLicenseNumber() );
+        entity.setConsultationFee( dto.getConsultationFee() );
+        entity.setIsAvailable( dto.getIsAvailable() );
+        entity.setPhoneNumber( dto.getPhoneNumber() );
+        entity.setDesignation( dto.getDesignation() );
     }
 
     @Override

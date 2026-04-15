@@ -15,6 +15,7 @@ com\hms\pharmacy\mapper\MedicineMapper.class
 com\hms\appointment\dto\response\AppointmentSummaryDTO$AppointmentSummaryDTOBuilder.class
 com\hms\HospitalManagementSystemApplication.class
 com\hms\pharmacy\repository\elasticsearch\MedicineSearchRepository.class
+com\hms\common\response\SearchResultDTO.class
 com\hms\security\config\SecurityConfig.class
 com\hms\security\jwt\JwtAuthenticationFilter.class
 com\hms\common\response\ValidationError.class
@@ -43,6 +44,7 @@ com\hms\common\config\JacksonConfig.class
 com\hms\doctor\dto\response\DoctorResponseDTO$DoctorResponseDTOBuilder.class
 com\hms\dashboard\controller\DashboardController.class
 com\hms\pharmacy\dto\response\MedicineSliceResponseDTO$MedicineSliceResponseDTOBuilder.class
+com\hms\pharmacy\service\impl\InventoryServiceImpl.class
 com\hms\billing\entity\Billing$BillingBuilderImpl.class
 com\hms\auth\service\impl\AuthServiceImpl.class
 com\hms\common\entity\BaseEntity.class
@@ -137,6 +139,7 @@ com\hms\pharmacy\repository\MedicineRepository.class
 com\hms\common\response\ApiError$ApiErrorBuilder.class
 com\hms\auth\repository\RevokedRefreshTokenRepository.class
 com\hms\common\exception\HmsErrorCode.class
+com\hms\common\response\SearchResultDTO$SearchResultDTOBuilder.class
 com\hms\auth\entity\RevokedRefreshToken$RevokedRefreshTokenBuilderImpl.class
 com\hms\doctor\repository\DoctorRepository.class
 com\hms\pharmacy\entity\Medicine$MedicineBuilderImpl.class
@@ -185,6 +188,7 @@ com\hms\pharmacy\exception\DuplicateMedicineException.class
 com\hms\doctor\dto\request\CreateDoctorRequest$CreateDoctorRequestBuilder.class
 com\hms\billing\mapper\BillingMapper.class
 com\hms\auth\dto\response\AuthResponse$AuthResponseBuilder.class
+com\hms\pharmacy\service\InventoryService.class
 com\hms\common\response\ApiError.class
 com\hms\prescription\dto\response\PrescriptionResponseDTO$PrescriptionResponseDTOBuilder.class
 com\hms\patient\entity\Patient$PatientBuilderImpl.class

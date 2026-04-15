@@ -106,6 +106,7 @@ C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\billing\mapper\Bil
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\controller\InventoryController.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\billing\controller\BillingController.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\doctor\exception\DoctorNotFoundException.java
+C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\response\SearchResultDTO.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\user\entity\User.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\user\exception\UserNotFoundException.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\appointment\exception\DoctorUnavailableException.java

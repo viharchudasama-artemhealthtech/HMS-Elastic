@@ -108,46 +108,6 @@ graph TB
     ```
     Access the app at `http://localhost:4200`.
 
-### Local Elasticsearch (For Medicine Search)
-
-The backend is configured to use local Elasticsearch at `http://localhost:9200`.
-
-Run Elasticsearch directly on Windows:
-
-1. Download and extract Elasticsearch 8.x zip from Elastic official site.
-2. In `config/elasticsearch.yml`, set:
-
-```yaml
-discovery.type: single-node
-xpack.security.enabled: false
-http.port: 9200
-```
-
-3. Start Elasticsearch:
-
-```bash
-bin\elasticsearch.bat
-```
-
-4. Verify:
-
-```bash
-curl http://localhost:9200
-```
-
-5. Restart backend after Elasticsearch is up:
-
-```bash
-cd backend
-mvn spring-boot:run
-```
-
-6. Use API from UI:
-- Active medicines: `GET /api/v1/medicines/active`
-- This endpoint now uses Elasticsearch first and falls back to DB if Elasticsearch is unavailable.
-
----
-
 ## 🔒 Reliability & Standards
 
 - **Audit Trail**: Automated tracking of `createdAt` and `updatedBy` for all clinical records.

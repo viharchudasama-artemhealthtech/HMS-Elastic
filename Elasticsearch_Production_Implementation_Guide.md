@@ -194,32 +194,6 @@ Elasticsearch can be built from source for custom modifications or to ensure com
    - Add `ES_HOME` to system PATH.
    - Set `JAVA_HOME` if not already set.
 
-### Option 2: Using Docker (For Development/Testing)
-
-1. **Pull Image:**
-
-   ```
-   docker pull docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-   ```
-
-2. **Run Container:**
-   ```
-   docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e "xpack.security.enabled=false" docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-   ```
-
-**Note:** Disable security in dev; enable in production.
-
-### Post-Installation Checks
-
-- Verify installation: `./bin/elasticsearch --version`
-- Check Java: `java -version`
-
----
-
-## Configuration
-
-Elasticsearch configuration is in `config/elasticsearch.yml`.
-
 ### Basic Configuration
 
 ```yaml

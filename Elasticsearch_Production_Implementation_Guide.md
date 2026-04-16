@@ -9,7 +9,7 @@ This document explains how Elasticsearch is installed, started, configured, and 
 - Medicine search and autocomplete.
 - Prefix matching for partial medicine names.
 - Better handling of punctuation, quotes, and compound names.
-- Fast search fallback when the database query would be too slow.
+- Fast search fallback when the database query would be too slow..
 
 ## Prerequisites
 

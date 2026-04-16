@@ -4,16 +4,14 @@
 
 1. [Introduction](#introduction)
 2. [Prerequisites](#prerequisites)
-3. [Building Elasticsearch](#building-elasticsearch)
-4. [Installation](#installation)
-5. [Configuration](#configuration)
-6. [Starting Elasticsearch](#starting-elasticsearch)
-7. [Integration with Spring Boot Application](#integration-with-spring-boot-application)
-8. [Control Flow System Diagram](#control-flow-system-diagram)
-9. [Monitoring and Maintenance](#monitoring-and-maintenance)
-10. [End-to-End Implementation Steps](#end-to-end-implementation-steps)
-11. [Troubleshooting](#troubleshooting)
-12. [Conclusion](#conclusion)
+3. [Installation](#installation)
+4. [Starting Elasticsearch](#starting-elasticsearch)
+5. [Integration with Spring Boot Application](#integration-with-spring-boot-application)
+6. [Control Flow System Diagram](#control-flow-system-diagram)
+7. [Monitoring and Maintenance](#monitoring-and-maintenance)
+8. [End-to-End Implementation Steps](#end-to-end-implementation-steps)
+9. [Troubleshooting](#troubleshooting)
+10. [Conclusion](#conclusion)
 
 ---
 
@@ -133,47 +131,6 @@ This section provides step-by-step instructions for setting up Elasticsearch loc
 - **Persistence:** Data is stored in `data` folder within the Elasticsearch directory. For development, this is fine; for production, use dedicated paths.
 
 This local setup is quick for development and testing the HMS search features.
-
----
-
-## Building Elasticsearch
-
-Elasticsearch can be built from source for custom modifications or to ensure compatibility. However, for production, use official binaries unless customization is required.
-
-### Steps to Build from Source (Optional)
-
-1. **Clone the Repository:**
-
-   ```
-   git clone https://github.com/elastic/elasticsearch.git
-   cd elasticsearch
-   ```
-
-2. **Checkout a Stable Tag:**
-
-   ```
-   git checkout v8.11.0  # Replace with latest stable version
-   ```
-
-3. **Build with Gradle:**
-
-   ```
-   ./gradlew assemble
-   ```
-
-4. **Create Distribution:**
-
-   ```
-   ./gradlew :distribution:archives:linux-tar:assemble
-   ```
-
-5. **Extract and Verify:**
-   - Extract the tar.gz file from `distribution/archives/linux-tar/build/distributions/`.
-   - Verify with `./bin/elasticsearch --version`.
-
-**Note:** Building from source is time-consuming (30-60 minutes) and requires significant resources. For production, download pre-built binaries from elastic.co.
-
----
 
 ## Installation
 

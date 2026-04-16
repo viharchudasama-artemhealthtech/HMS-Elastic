@@ -1,185 +1,124 @@
 # Elasticsearch Production Implementation Guide
 
-## Table of Contents
+## Purpose
 
-1. [Introduction](#introduction)
-2. [Prerequisites](#prerequisites)
-3. [Installation](#installation)
-4. [Starting Elasticsearch](#starting-elasticsearch)
-5. [Integration with Spring Boot Application](#integration-with-spring-boot-application)
-6. [Control Flow System Diagram](#control-flow-system-diagram)
-7. [Monitoring and Maintenance](#monitoring-and-maintenance)
-8. [End-to-End Implementation Steps](#end-to-end-implementation-steps)
-9. [Troubleshooting](#troubleshooting)
-10. [Conclusion](#conclusion)
+This document explains how Elasticsearch is installed, started, configured, and integrated in the HMS project. It is written so a new developer can set it up locally and understand how to move the same setup toward production.
 
----
+## What Elasticsearch Is Used For
 
-## Introduction
-
-This document provides a comprehensive guide for implementing Elasticsearch in a production environment for the Pharmacy Management System (HMS). Elasticsearch is used for advanced search functionality, particularly for medicine autocomplete and search features. This guide covers building, installing, configuring, and maintaining Elasticsearch from start to finish, ensuring high availability, security, and performance in production.
-
-### Purpose
-
-- Standardize Elasticsearch implementation across the company.
-- Ensure consistent setup for search functionality in HMS.
-- Provide end-to-end guidance for production deployment.
-
-### Scope
-
-- Covers Elasticsearch 8.x (latest stable version).
-- Focuses on Linux/Windows environments (adaptable).
-- Includes integration with Spring Boot backend.
-
----
+- Medicine search and autocomplete.
+- Prefix matching for partial medicine names.
+- Better handling of punctuation, quotes, and compound names.
+- Fast search fallback when the database query would be too slow.
 
 ## Prerequisites
 
-Before implementing Elasticsearch, ensure the following:
+Before you start, install or confirm the following:
 
-- **Hardware Requirements:**
-  - Minimum: 2 CPU cores, 4GB RAM, 10GB disk space.
-  - Recommended (Production): 4+ CPU cores, 16GB+ RAM, 100GB+ SSD storage.
-  - For high-traffic: Scale based on data volume (e.g., 1TB+ for large medicine databases).
+- Windows 10 or later.
+- Java 17 or the version required by the Elasticsearch release you download.
+- A browser and access to the internet for downloading Elasticsearch.
+- Maven for the backend project.
+- Node.js and Angular CLI if you also want to run the frontend.
 
-- **Software Requirements:**
-  - Java 11 or higher (Elasticsearch requires JVM).
-  - Maven 3.6+ (for building if needed).
-  - Git (for cloning source if building from source).
-  - Docker (optional, for containerized deployment).
+## Local Installation Steps on Windows
 
-- **Network Requirements:**
-  - Open ports: 9200 (HTTP), 9300 (Transport).
-  - Firewall rules for cluster communication.
+This is the exact flow used in the HMS project for local development.
 
-- **Knowledge Prerequisites:**
-  - Basic understanding of search engines and indexing.
-  - Familiarity with Spring Boot and JPA.
-  - Experience with Linux/Windows system administration.
+### 1. Download Elasticsearch
 
----
+1. Open the official download page: https://www.elastic.co/downloads/elasticsearch.
+2. Download the Windows ZIP version.
+3. Save the file somewhere simple, for example `C:\Downloads` or your Desktop.
 
-## Local Development Setup
+### 2. Extract the ZIP file
 
-This section provides step-by-step instructions for setting up Elasticsearch locally on your Windows machine for development purposes, based on the HMS project setup.
+1. Right-click the downloaded ZIP file.
+2. Select `Extract All` or use 7-Zip.
+3. Extract it to a folder such as `C:\elasticsearch`.
+4. After extraction, you should see a folder like `C:\elasticsearch\elasticsearch-8.x.x`.
 
-### Step 1: Download Elasticsearch
+### 3. Open the `bin` folder
 
-1. Open your web browser and go to the official Elasticsearch download page: [https://www.elastic.co/downloads/elasticsearch](https://www.elastic.co/downloads/elasticsearch).
-2. Select the latest stable version (e.g., 8.11.0 or higher).
-3. Choose the Windows ZIP download option (e.g., `elasticsearch-8.11.0-windows-x86_64.zip`).
-4. Click the download button and save the ZIP file to your desired location (e.g., `C:\Downloads` or your Desktop).
+1. Open the extracted Elasticsearch folder.
+2. Go into the `bin` folder.
+3. The path should look like `C:\elasticsearch\elasticsearch-8.x.x\bin`.
 
-### Step 2: Extract the Downloaded File
+### 4. Open Command Prompt in that folder
 
-1. Locate the downloaded ZIP file (e.g., `elasticsearch-8.11.0-windows-x86_64.zip`).
-2. Right-click on the file and select "Extract All..." or use a tool like 7-Zip to extract it.
-3. Choose an extraction location. For example, extract to `C:\elasticsearch` or a folder on your Desktop.
-4. After extraction, you should have a folder like `C:\elasticsearch\elasticsearch-8.11.0`.
+1. Click the address bar in File Explorer and type `cmd`, then press Enter.
+2. Or hold `Shift` and right-click inside the folder, then open Command Prompt or PowerShell.
 
-### Step 3: Navigate to the Bin Directory
+### 5. Start Elasticsearch
 
-1. Open File Explorer.
-2. Go to the extracted Elasticsearch folder (e.g., `C:\elasticsearch\elasticsearch-8.11.0`).
-3. Inside that folder, navigate to the `bin` subdirectory. The path should be something like `C:\elasticsearch\elasticsearch-8.11.0\bin`.
+Run this command from the `bin` folder:
 
-### Step 4: Open Command Prompt in the Bin Directory
-
-1. In File Explorer, while in the `bin` folder, hold Shift and right-click in an empty space.
-2. Select "Open PowerShell window here" or "Open command window here" from the context menu. This opens a Command Prompt (cmd) or PowerShell window directly in the `bin` directory.
-
-### Step 5: Run Elasticsearch
-
-1. In the Command Prompt window, type the following command and press Enter:
-   ```
-   elasticsearch.bat
-   ```
-2. Elasticsearch will start initializing. You should see output indicating it's starting up, such as:
-   - Loading configuration
-   - Starting nodes
-   - Cluster status
-3. Wait for the startup to complete. It may take 10-30 seconds.
-4. Once started, you'll see logs indicating the node is up, such as:
-   - Recovery of indices: `[INFO ][o.e.g.GatewayService] recovered [X] indices into cluster_state`
-   - License status: `[INFO ][o.e.x.w.LicensedWriteLoadForecaster] license state changed, now [not valid]` (for free/basic license)
-   - Health node selection: `[INFO ][o.e.h.n.s.HealthNodeTaskExecutor] Node [{node-name}] is selected as the current health node.`
-   - Cluster health: `[INFO ][o.e.c.r.a.AllocationService] current.health="YELLOW" message="Cluster health status changed from [RED] to [YELLOW]"`
-
-   **What these logs mean:**
-   - **Recovered indices:** Elasticsearch is loading existing data/indexes from disk.
-   - **License not valid:** Using the free/basic license; for production, consider a paid license.
-   - **Health node:** The node is elected to monitor cluster health.
-   - **Cluster health YELLOW:** All primary shards are allocated, but some replica shards are unassigned (normal for single-node setup). GREEN means fully healthy.
-
-### Step 6: Verify Elasticsearch is Running
-
-1. Open a web browser.
-2. Go to `http://localhost:9200`.
-3. You should see a JSON response with cluster information, confirming Elasticsearch is running.
-
-### Step 7: Stop Elasticsearch (When Needed)
-
-1. In the Command Prompt window where Elasticsearch is running, press `Ctrl + C` to stop it gracefully.
-2. Alternatively, close the Command Prompt window to terminate the process.
-
-### Additional Notes for Local Setup
-
-- **Security:** By default, Elasticsearch 8.x has security enabled. On first run, it will generate passwords and certificates. Note them down securely.
-- **Configuration:** For development, the default config in `config/elasticsearch.yml` is usually sufficient. You can edit it to disable security if needed (not recommended for production).
-- **Integration with HMS:** Once running, your Spring Boot app can connect to `http://localhost:9200`. Ensure your `application.properties` has `spring.elasticsearch.uris=http://localhost:9200`.
-- **Troubleshooting:** If it fails to start, check Java installation (`java -version`) and ensure ports 9200/9300 are free.
-- **Persistence:** Data is stored in `data` folder within the Elasticsearch directory. For development, this is fine; for production, use dedicated paths.
-
-This local setup is quick for development and testing the HMS search features.
-
-## Installation
-
-### Option 1: Download and Install Binaries (Recommended for Production)
-
-1. **Download Elasticsearch:**
-   - Visit [elastic.co/downloads/elasticsearch](https://www.elastic.co/downloads/elasticsearch).
-   - Download the ZIP/TAR for your OS (e.g., elasticsearch-8.11.0-windows-x86_64.zip).
-
-2. **Extract to Directory:**
-
-   ```
-   unzip elasticsearch-8.11.0-windows-x86_64.zip
-   cd elasticsearch-8.11.0
-   ```
-
-3. **Set Environment Variables:**
-   - Add `ES_HOME` to system PATH.
-   - Set `JAVA_HOME` if not already set.
-
-### Basic Configuration
-
-```yaml
-# Cluster and Node Settings
-cluster.name: hms-elasticsearch-cluster
-node.name: hms-node-1
-path.data: /var/lib/elasticsearch/data
-path.logs: /var/lib/elasticsearch/logs
-
-# Network Settings
-network.host: 0.0.0.0
-http.port: 9200
-
-# Discovery (Single Node for Small Deployments)
-discovery.type: single-node
-
-# Security (Enable in Production)
-xpack.security.enabled: true
-xpack.security.transport.ssl.enabled: true
-xpack.security.http.ssl.enabled: true
-
-# Memory Settings (in jvm.options)
--Xms4g
--Xmx4g
+```bat
+elasticsearch.bat
 ```
 
-### Custom Analyzers for HMS (Based on Project Config)
+What happens after that:
 
-For medicine search, configure custom analyzers in `elasticsearch.yml` or via API:
+- Elasticsearch loads its configuration.
+- It starts the node process.
+- It recovers existing indices if data already exists.
+- It opens the HTTP port, usually `9200`.
+
+### 6. Check the startup output
+
+You will usually see logs similar to these:
+
+```text
+[INFO ][o.e.g.GatewayService] recovered [6] indices into cluster_state
+[INFO ][o.e.h.n.s.HealthNodeTaskExecutor] Node [ARTEM] is selected as the current health node.
+[INFO ][o.e.c.r.a.AllocationService] current.health="YELLOW" message="Cluster health status changed from [RED] to [YELLOW]"
+```
+
+What those logs mean:
+
+- `recovered [6] indices` means Elasticsearch loaded data from disk.
+- `current health node` means the node is active and managing cluster health.
+- `YELLOW` is normal for a single-node setup because replicas are not assigned.
+
+### 7. Verify Elasticsearch is running
+
+Open a browser and go to:
+
+```text
+http://localhost:9200
+```
+
+If Elasticsearch is running, you should see a JSON response with cluster details.
+
+### 8. Stop Elasticsearch
+
+When you want to stop it:
+
+1. Go back to the Command Prompt window.
+2. Press `Ctrl + C`.
+3. Wait for the process to stop cleanly.
+
+## Project Configuration in HMS
+
+The HMS project connects Spring Boot to Elasticsearch using Spring Data Elasticsearch.
+
+### Main files involved
+
+- `backend/src/main/java/com/hms/pharmacy/config/MedicineSearchIndexConfig.java`
+- `backend/src/main/java/com/hms/pharmacy/entity/Medicine.java`
+- `backend/src/main/java/com/hms/pharmacy/repository/MedicineRepository.java`
+- `backend/src/main/java/com/hms/pharmacy/service/search/MedicineSearchService.java`
+
+### What each file does
+
+- `MedicineSearchIndexConfig.java` creates the index and defines analyzers.
+- `Medicine.java` stores the medicine fields that are indexed.
+- `MedicineRepository.java` gives repository access for search and indexing.
+- `MedicineSearchService.java` runs search queries and handles fallback logic.
+
+## Elasticsearch Settings Used by HMS
+
+The HMS implementation uses custom analyzers so search can handle medicine names with punctuation, quotes, and short prefixes.
 
 ```yaml
 analysis:
@@ -209,171 +148,66 @@ analysis:
       max_gram: 20
 ```
 
-This handles special characters, punctuation, and enables prefix matching (e.g., "S" matches "'S' Nut").
+Why this matters:
 
-### Production-Specific Settings
+- `standard` tokenizer handles normal word splitting.
+- `word_delimiter` helps with compound medicine names.
+- `edge_ngram` lets search match short prefixes like `S`.
+- `smart_quotes` normalizes curly quotes to plain quotes.
 
-- Enable TLS/SSL for transport and HTTP.
-- Configure authentication (basic auth or API keys).
-- Set up cluster with multiple nodes for HA.
-- Configure backups and snapshots.
-
----
-
-## Starting Elasticsearch
-
-### Starting from Binaries
-
-1. **Navigate to Installation Directory:**
-
-   ```
-   cd /path/to/elasticsearch
-   ```
-
-2. **Start Elasticsearch:**
-
-   ```
-   ./bin/elasticsearch
-   ```
-
-3. **Run in Background (Production):**
-
-   ```
-   nohup ./bin/elasticsearch > /dev/null 2>&1 &
-   ```
-
-4. **Verify Startup:**
-   - Check logs: `tail -f logs/elasticsearch.log`
-   - Test API: `curl -X GET "localhost:9200"`
-
----
-
-## Integration with Spring Boot Application
-
-In the HMS project, Elasticsearch is integrated via Spring Data Elasticsearch.
-
-### Key Components
-
-1. **Configuration Class:** `MedicineSearchIndexConfig.java`
-   - Defines index settings, mappings, and analyzers.
-   - Example: Creates "medicines" index with custom analyzers.
-
-2. **Entity:** `Medicine.java`
-   - JPA entity with `@Document(indexName = "medicines")`.
-   - Fields: name, medicineCode, isActive, etc.
-
-3. **Repository:** `MedicineRepository.java`
-   - Extends `ElasticsearchRepository<Medicine, String>`.
-
-4. **Service:** `MedicineSearchService.java`
-   - Handles search queries with bool queries, fuzzy matching, and fallbacks to DB.
-
-### Integration Steps
-
-1. Add Dependencies in `pom.xml`:
-
-   ```xml
-   <dependency>
-       <groupId>org.springframework.data</groupId>
-       <artifactId>spring-data-elasticsearch</artifactId>
-   </dependency>
-   ```
-
-2. Configure in `application.properties`:
-
-   ```
-   spring.elasticsearch.uris=http://localhost:9200
-   ```
-
-3. Index Creation on Startup:
-   - Use `@PostConstruct` in config to create index if not exists.
-
-4. Data Seeding:
-   - Use `MedicineSeeder.java` to load from CSV and index in ES.
-
----
-
-## Control Flow System Diagram
-
-Below is a Mermaid diagram illustrating the control flow for Elasticsearch in the HMS system.
+## Control Flow
 
 ```mermaid
 graph TD
-    A[User Types in Search Box] --> B[Frontend Autocomplete Request]
-    B --> C[Spring Boot Controller]
+    A[User types medicine name] --> B[Frontend autocomplete request]
+    B --> C[Spring Boot controller]
     C --> D[MedicineSearchService]
-    D --> E{Elasticsearch Query}
-    E --> F[Index Search with Custom Analyzer]
-    F --> G[Results Found?]
-    G -->|Yes| H[Return Results to Frontend]
-    G -->|No| I[Fallback to DB LIKE Query]
-    I --> J[Return DB Results]
-    H --> K[Display in Table/Pagination]
+    D --> E{Elasticsearch search}
+    E --> F[Index search with custom analyzer]
+    F --> G{Results found?}
+    G -->|Yes| H[Return results to frontend]
+    G -->|No| I[Fallback to database search]
+    I --> J[Return fallback results]
+    H --> K[Show results in table]
     J --> K
-    L[Admin Triggers Reindex] --> M[Reindex Endpoint]
-    M --> N[Delete Old Index]
-    N --> O[Create New Index with Config]
-    O --> P[Bulk Index from DB]
-    P --> Q[Index Ready]
+    L[Admin updates analyzer or mapping] --> M[Delete and recreate index]
+    M --> N[Reindex medicines]
+    N --> O[Index ready]
 ```
 
-This diagram shows the end-to-end flow from user input to search results, including reindexing.
+## End-to-End Flow for New Developers
 
-## Monitoring and Maintenance
+1. Download and extract Elasticsearch.
+2. Start Elasticsearch with `elasticsearch.bat` from the `bin` folder.
+3. Confirm `http://localhost:9200` is responding.
+4. Start the backend Spring Boot application.
+5. Open the frontend application.
+6. Search for medicines and confirm autocomplete works.
+7. If analyzer changes are made, delete and recreate the index, then reindex the data.
 
-### Monitoring Tools
+## Production Checklist
 
-- **Built-in:** `_cluster/health`, `_cat/nodes`.
-- **External:** ELK Stack (Elasticsearch, Logstash, Kibana) for visualization.
+- Enable security and TLS.
+- Use a proper cluster, not only a single local node.
+- Set heap memory according to available RAM.
+- Back up indices with snapshots.
+- Monitor logs, cluster health, and disk usage.
+- Reindex after changing analyzers or mappings.
 
-### Commands
+## Common Startup Output and Meaning
 
-- Health Check: `curl -X GET "localhost:9200/_cluster/health?pretty"`
-- Index Stats: `curl -X GET "localhost:9200/medicines/_stats?pretty"`
-
----
-
-## End-to-End Implementation Steps
-
-1. **Planning:**
-   - Assess data volume and search requirements.
-   - Design index mappings and analyzers.
-
-2. **Setup:**
-   - Install Elasticsearch as per above.
-   - Configure for production.
-
-3. **Integration:**
-   - Add ES dependencies to Spring Boot.
-   - Implement config, entities, services.
-
-4. **Deployment:**
-   - Deploy ES cluster.
-   - Deploy application with ES integration.
-
-5. **Go-Live:**
-   - Seed data and reindex.
-   - Monitor performance.
-
----
+- `recovered [X] indices` means old data was loaded successfully.
+- `current health node` means the node is active.
+- `YELLOW` means the cluster is usable, but replicas are not assigned.
+- `GREEN` means all primaries and replicas are healthy.
 
 ## Troubleshooting
 
-- **Common Issues:**
-  - Port conflicts: Change ports in config.
-  - Memory errors: Adjust JVM settings.
-  - Search not matching: Check analyzer tokenization with `_analyze` API.
+- If Elasticsearch does not start, check Java first.
+- If port `9200` is already in use, stop the conflicting process.
+- If search results are missing, verify the index mapping and analyzer.
+- If you change search settings, reindex the data.
 
-- **Logs:** Check `logs/elasticsearch.log` for errors.
+## Summary
 
-- **Support:** Refer to [elastic.co/support](https://www.elastic.co/support).
-
----
-
-## Conclusion
-
-This guide ensures a standardized, production-ready implementation of Elasticsearch for the HMS project. Follow the steps sequentially for successful deployment. For updates or customizations, refer to the official Elasticsearch documentation.
-
----
-
-_This document is a living standard. Update as needed for new versions or requirements._
+For local development on Windows, the key steps are: download Elasticsearch, extract the ZIP, open the `bin` folder, run `elasticsearch.bat`, then verify `http://localhost:9200`. After that, connect the HMS backend to Elasticsearch and reindex the medicine data.

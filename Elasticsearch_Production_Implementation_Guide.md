@@ -246,18 +246,6 @@ This handles special characters, punctuation, and enables prefix matching (e.g.,
    - Check logs: `tail -f logs/elasticsearch.log`
    - Test API: `curl -X GET "localhost:9200"`
 
-### Starting with Docker
-
-```
-docker start elasticsearch
-```
-
-### Startup Options
-
-- **Foreground:** `./bin/elasticsearch` (for debugging).
-- **Daemon:** `./bin/elasticsearch -d` (background).
-- **Custom Config:** `./bin/elasticsearch -E path.conf=/custom/config`
-
 ---
 
 ## Integration with Spring Boot Application

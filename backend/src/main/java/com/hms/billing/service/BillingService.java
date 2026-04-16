@@ -5,6 +5,9 @@ import com.hms.billing.dto.response.BillingResponseDTO;
 import com.hms.common.enums.PaymentStatus;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public interface BillingService {
     BillingResponseDTO createBilling(BillingRequestDTO dto);
     BillingResponseDTO getBillingById(Long id);

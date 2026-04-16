@@ -31,42 +31,66 @@ public class MedicineSearchIndexConfig {
                 IndexOperations indexOps = elasticsearchOperations.indexOps(MedicineSearch.class);
 
                 if (indexOps.exists()) {
-                    indexOps.putMapping(indexOps.createMapping(MedicineSearch.class));
-                    log.info("Updated Elasticsearch mapping for medicines index");
-                    return;
+                    indexOps.delete();
+                    log.info("Deleted existing Elasticsearch index medicines for reconfig");
                 }
-
-                // If index doesn't exist -> create it
 
                 // Edge End gram user for auto complete
                 Map<String, Object> edgeNgramFilter = new LinkedHashMap<>();
                 edgeNgramFilter.put("type", "edge_ngram");
-                edgeNgramFilter.put("min_gram", 2);
+                edgeNgramFilter.put("min_gram", 1);
                 edgeNgramFilter.put("max_gram", 20);
 
-                // Index Analyzer slit text into words
+                // Word delimiter filter splits punctuation and numeric boundaries
+                Map<String, Object> wordDelimiterFilter = new LinkedHashMap<>();
+                wordDelimiterFilter.put("type", "word_delimiter");
+                wordDelimiterFilter.put("preserve_original", true);
+                wordDelimiterFilter.put("split_on_case_change", true);
+                wordDelimiterFilter.put("split_on_numerics", true);
+                wordDelimiterFilter.put("generate_word_parts", true);
+                wordDelimiterFilter.put("generate_number_parts", true);
+
+                // Normalize smart quotes to plain quotes so tokenizer splits correctly
+                Map<String, Object> smartQuotesCharFilter = new LinkedHashMap<>();
+                smartQuotesCharFilter.put("type", "mapping");
+                smartQuotesCharFilter.put("mappings", new String[]{
+                        "\u201C=>\"",
+                        "\u201D=>\"",
+                        "\u2018=>\'",
+                        "\u2019=>\'"
+                });
+
+                // Index Analyzer splits on standard tokenizer, lowercases, and generates autocomplete ngrams
                 Map<String, Object> autocompleteIndexAnalyzer = new LinkedHashMap<>();
                 autocompleteIndexAnalyzer.put("type", "custom");
+                autocompleteIndexAnalyzer.put("char_filter", new String[]{"smart_quotes"});
                 autocompleteIndexAnalyzer.put("tokenizer", "standard");
-                autocompleteIndexAnalyzer.put("filter", new String[]{"lowercase", "autocomplete_filter"});
+                autocompleteIndexAnalyzer.put("filter", new String[]{"lowercase", "word_delimiter", "autocomplete_filter"});
 
-                // Search Analyzer => user type para should match all token paracetamol
+                // Search Analyzer uses standard tokenizer and lowercase normalization
                 Map<String, Object> autocompleteSearchAnalyzer = new LinkedHashMap<>();
                 autocompleteSearchAnalyzer.put("type", "custom");
+                autocompleteSearchAnalyzer.put("char_filter", new String[]{"smart_quotes"});
                 autocompleteSearchAnalyzer.put("tokenizer", "standard");
                 autocompleteSearchAnalyzer.put("filter", new String[]{"lowercase"});
 
-                // Combine filter
+                // Combine filter and char filter
                 Map<String, Object> analysis = new LinkedHashMap<>();
-                analysis.put("filter", Map.of("autocomplete_filter", edgeNgramFilter));
+                analysis.put("filter", Map.of(
+                        "autocomplete_filter", edgeNgramFilter,
+                        "word_delimiter", wordDelimiterFilter
+                ));
+                analysis.put("char_filter", Map.of(
+                        "smart_quotes", smartQuotesCharFilter
+                ));
                 analysis.put("analyzer", Map.of(
                         "autocomplete_index", autocompleteIndexAnalyzer,
                         "autocomplete_search", autocompleteSearchAnalyzer
                 ));
 
                 Settings settings = new Settings(Map.of(
-                                "index", Map.of(
-                                "max_ngram_diff", 18,
+                        "index", Map.of(
+                                "max_ngram_diff", 19,
                                 "analysis", analysis
                         )
                 ));

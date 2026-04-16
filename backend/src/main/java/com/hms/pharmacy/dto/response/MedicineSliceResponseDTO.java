@@ -18,4 +18,7 @@ public class MedicineSliceResponseDTO {
     private int size;
     private boolean hasNext;
     private boolean hasPrevious;
+    private long total;
+    private long inStockCount;
+    private long outOfStockCount;
 }

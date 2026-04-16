@@ -22,6 +22,10 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     Slice<Medicine> findAllBy(Pageable pageable);
 
+    long countByQuantityInStockGreaterThan(int quantity);
+
+    long countByQuantityInStockLessThanEqual(int quantity);
+
     @Query("""
             SELECT m FROM Medicine m
             WHERE m.isActive = true

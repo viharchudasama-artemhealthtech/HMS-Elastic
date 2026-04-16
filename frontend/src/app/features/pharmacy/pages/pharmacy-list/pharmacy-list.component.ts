@@ -71,6 +71,9 @@ export class PharmacyListComponent implements OnInit, OnDestroy {
   readonly pageSize = 10;
   hasNextPage = false;
   hasPreviousPage = false;
+  totalMedicines = 0;
+  inStockCount = 0;
+  outOfStockCount = 0;
 
   categories = Object.values(MedicineCategory);
   private readonly destroy$ = new Subject<void>();
@@ -116,7 +119,7 @@ export class PharmacyListComponent implements OnInit, OnDestroy {
           this.searchError = '';
           this.selectedSuggestion = null;
 
-          if (keyword.length < 2) {
+          if (keyword.length < 1) {
             this.searchSuggestions = [];
             this.searchMatchedMedicineIds.clear();
             this.applyFilter();
@@ -156,6 +159,11 @@ export class PharmacyListComponent implements OnInit, OnDestroy {
         this.currentPage = pageData?.page ?? this.currentPage;
         this.hasNextPage = pageData?.hasNext ?? false;
         this.hasPreviousPage = pageData?.hasPrevious ?? false;
+        const pageInStock = this.medicines.filter((m) => m.quantityInStock > 0).length;
+        const pageOutOfStock = this.medicines.length - pageInStock;
+        this.totalMedicines = pageData?.total ?? this.medicines.length;
+        this.inStockCount = pageData?.inStockCount ?? pageInStock;
+        this.outOfStockCount = pageData?.outOfStockCount ?? pageOutOfStock;
         this.applyFilter();
         this.isLoading = false;
       },
@@ -224,7 +232,22 @@ export class PharmacyListComponent implements OnInit, OnDestroy {
     this.searchSuggestions = [];
     this.searchControl.setValue(suggestion.name, { emitEvent: false });
     this.searchMatchedMedicineIds = new Set([String(suggestion.id)]);
-    this.applyFilter();
+
+    const selectedOnCurrentPage = this.medicines.some((medicine) => medicine.id === suggestion.id);
+    if (selectedOnCurrentPage) {
+      this.applyFilter();
+      return;
+    }
+
+    this.medicineService.getById(suggestion.id).subscribe({
+      next: (response) => {
+        const medicine = response.data;
+        this.filteredMedicines = medicine ? [medicine] : [];
+      },
+      error: () => {
+        this.filteredMedicines = [];
+      },
+    });
   }
 
   clearSearch(): void {

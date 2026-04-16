@@ -22,6 +22,7 @@ C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\config\Me
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\prescription\service\PrescriptionService.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\doctor\dto\request\CreateDoctorRequest.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\response\ApiError.java
+C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\pharmacy\seeder\MedicineSeeder.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\common\enums\Role.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\doctor\service\DoctorService.java
 C:\Users\Piyush\Desktop\Project\backend\src\main\java\com\hms\HospitalManagementSystemApplication.java

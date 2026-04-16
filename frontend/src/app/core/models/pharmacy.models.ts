@@ -72,4 +72,7 @@ export interface MedicineSlice {
   size: number;
   hasNext: boolean;
   hasPrevious: boolean;
+  total?: number;
+  inStockCount?: number;
+  outOfStockCount?: number;
 }

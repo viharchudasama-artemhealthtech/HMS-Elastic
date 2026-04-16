@@ -8,6 +8,7 @@ com\hms\common\entity\BaseEntity$BaseEntityBuilder.class
 com\hms\appointment\dto\response\AppointmentSummaryDTO.class
 com\hms\doctor\entity\Doctor.class
 com\hms\user\mapper\UserMapperImpl.class
+com\hms\pharmacy\seeder\MedicineSeeder.class
 com\hms\common\entity\Auditable.class
 com\hms\pharmacy\controller\MedicineController.class
 com\hms\doctor\dto\request\UpdateDoctorRequest.class

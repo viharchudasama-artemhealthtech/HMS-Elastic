@@ -58,6 +58,7 @@ public class MedicineSearchService {
             throw new BadRequestException("Search keyword is required");
         }
 
+        long startTime = System.nanoTime();
         try {
             List<String> phoneticCodes = buildPhoneticCodes(query);
             NativeQuery searchQuery = NativeQuery.builder()
@@ -84,16 +85,23 @@ public class MedicineSearchService {
                     .withPageable(PageRequest.of(0, 10))
                     .build();
 
-            return elasticsearchOperations.search(searchQuery, MedicineSearch.class)
+            List<MedicineSuggestionDTO> results = elasticsearchOperations.search(searchQuery, MedicineSearch.class)
                     .stream()
                     .map(SearchHit::getContent)
                     .map(this::toSuggestionDto)
                     .toList();
+            long endTime = System.nanoTime();
+            log.info("Elasticsearch search for '{}' took {} ms", query, (endTime - startTime) / 1_000_000);
+            return results;
         } catch (Exception ex) {
-            log.warn("Elasticsearch autocomplete failed, using DB fallback: {}", ex.getMessage());
-            return medicineRepository.searchActiveMedicines(query, PageRequest.of(0, 10)).stream()
+            long esFailTime = System.nanoTime();
+            log.warn("Elasticsearch autocomplete failed after {} ms, using DB fallback: {}", (esFailTime - startTime) / 1_000_000, ex.getMessage());
+            List<MedicineSuggestionDTO> results = medicineRepository.searchActiveMedicines(query, PageRequest.of(0, 10)).stream()
                     .map(this::toSuggestionDto)
                     .toList();
+            long dbEndTime = System.nanoTime();
+            log.info("DB fallback search for '{}' took {} ms", query, (dbEndTime - esFailTime) / 1_000_000);
+            return results;
         }
     }
 

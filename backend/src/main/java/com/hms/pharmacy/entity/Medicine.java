@@ -48,8 +48,7 @@ public class Medicine extends Auditable {
     @Column(name = "dosage")
     private String dosage;
 
-    @Builder.Default
     @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
+    private Boolean isActive;
 
 }

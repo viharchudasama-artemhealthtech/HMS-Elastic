@@ -107,6 +107,9 @@ public class MedicineServiceImpl implements MedicineService {
                 .size(medicinesSlice.getSize())
                 .hasNext(medicinesSlice.hasNext())
                 .hasPrevious(medicinesSlice.hasPrevious())
+                .total(medicineRepository.count())
+                .inStockCount(medicineRepository.countByQuantityInStockGreaterThan(0))
+                .outOfStockCount(medicineRepository.countByQuantityInStockLessThanEqual(0))
                 .build();
     }
 

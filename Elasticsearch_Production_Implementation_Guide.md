@@ -1,6 +1,5 @@
 # Elasticsearch Production Implementation Guide
 
-
 ## Table of Contents
 
 1. [Introduction](#introduction)
@@ -23,11 +22,13 @@
 This document provides a comprehensive guide for implementing Elasticsearch in a production environment for the Pharmacy Management System (HMS). Elasticsearch is used for advanced search functionality, particularly for medicine autocomplete and search features. This guide covers building, installing, configuring, and maintaining Elasticsearch from start to finish, ensuring high availability, security, and performance in production.
 
 ### Purpose
+
 - Standardize Elasticsearch implementation across the company.
 - Ensure consistent setup for search functionality in HMS.
 - Provide end-to-end guidance for production deployment.
 
 ### Scope
+
 - Covers Elasticsearch 8.x (latest stable version).
 - Focuses on Linux/Windows environments (adaptable).
 - Includes integration with Spring Boot backend.
@@ -105,7 +106,7 @@ This section provides step-by-step instructions for setting up Elasticsearch loc
    - License status: `[INFO ][o.e.x.w.LicensedWriteLoadForecaster] license state changed, now [not valid]` (for free/basic license)
    - Health node selection: `[INFO ][o.e.h.n.s.HealthNodeTaskExecutor] Node [{node-name}] is selected as the current health node.`
    - Cluster health: `[INFO ][o.e.c.r.a.AllocationService] current.health="YELLOW" message="Cluster health status changed from [RED] to [YELLOW]"`
-   
+
    **What these logs mean:**
    - **Recovered indices:** Elasticsearch is loading existing data/indexes from disk.
    - **License not valid:** Using the free/basic license; for production, consider a paid license.
@@ -142,22 +143,26 @@ Elasticsearch can be built from source for custom modifications or to ensure com
 ### Steps to Build from Source (Optional)
 
 1. **Clone the Repository:**
+
    ```
    git clone https://github.com/elastic/elasticsearch.git
    cd elasticsearch
    ```
 
 2. **Checkout a Stable Tag:**
+
    ```
    git checkout v8.11.0  # Replace with latest stable version
    ```
 
 3. **Build with Gradle:**
+
    ```
    ./gradlew assemble
    ```
 
 4. **Create Distribution:**
+
    ```
    ./gradlew :distribution:archives:linux-tar:assemble
    ```
@@ -179,6 +184,7 @@ Elasticsearch can be built from source for custom modifications or to ensure com
    - Download the ZIP/TAR for your OS (e.g., elasticsearch-8.11.0-windows-x86_64.zip).
 
 2. **Extract to Directory:**
+
    ```
    unzip elasticsearch-8.11.0-windows-x86_64.zip
    cd elasticsearch-8.11.0
@@ -191,6 +197,7 @@ Elasticsearch can be built from source for custom modifications or to ensure com
 ### Option 2: Using Docker (For Development/Testing)
 
 1. **Pull Image:**
+
    ```
    docker pull docker.elastic.co/elasticsearch/elasticsearch:8.11.0
    ```
@@ -249,8 +256,8 @@ analysis:
     smart_quotes:
       type: mapping
       mappings:
-        - "“ => \""
-        - "” => \""
+        - '“ => "'
+        - '” => "'
         - "‘ => '"
         - "’ => '"
   analyzer:
@@ -287,16 +294,19 @@ This handles special characters, punctuation, and enables prefix matching (e.g.,
 ### Starting from Binaries
 
 1. **Navigate to Installation Directory:**
+
    ```
    cd /path/to/elasticsearch
    ```
 
 2. **Start Elasticsearch:**
+
    ```
    ./bin/elasticsearch
    ```
 
 3. **Run in Background (Production):**
+
    ```
    nohup ./bin/elasticsearch > /dev/null 2>&1 &
    ```
@@ -342,6 +352,7 @@ In the HMS project, Elasticsearch is integrated via Spring Data Elasticsearch.
 ### Integration Steps
 
 1. Add Dependencies in `pom.xml`:
+
    ```xml
    <dependency>
        <groupId>org.springframework.data</groupId>
@@ -350,6 +361,7 @@ In the HMS project, Elasticsearch is integrated via Spring Data Elasticsearch.
    ```
 
 2. Configure in `application.properties`:
+
    ```
    spring.elasticsearch.uris=http://localhost:9200
    ```
@@ -445,4 +457,4 @@ This guide ensures a standardized, production-ready implementation of Elasticsea
 
 ---
 
-*This document is a living standard. Update as needed for new versions or requirements.*
+_This document is a living standard. Update as needed for new versions or requirements._

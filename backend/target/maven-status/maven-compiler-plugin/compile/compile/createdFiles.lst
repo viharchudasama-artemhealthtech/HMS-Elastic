@@ -137,7 +137,6 @@ com\hms\pharmacy\dto\request\RestockMedicineRequestDTO.class
 com\hms\pharmacy\dto\response\MedicineSuggestionDTO$MedicineSuggestionDTOBuilder.class
 com\hms\billing\dto\request\BillingItemRequestDTO$BillingItemRequestDTOBuilder.class
 com\hms\pharmacy\repository\MedicineRepository.class
-com\hms\common\response\ApiError$ApiErrorBuilder.class
 com\hms\auth\repository\RevokedRefreshTokenRepository.class
 com\hms\common\exception\HmsErrorCode.class
 com\hms\common\response\SearchResultDTO$SearchResultDTOBuilder.class

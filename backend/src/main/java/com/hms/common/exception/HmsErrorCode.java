@@ -1,10 +1,5 @@
 package com.hms.common.exception;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-@Getter
-@RequiredArgsConstructor
 public enum HmsErrorCode {
     
     // General Errors
@@ -33,6 +28,12 @@ public enum HmsErrorCode {
 
     // Request Errors
     BAD_REQUEST("REQ_001", "The request is invalid"),
+    INVALID_REQUEST_BODY("REQ_002", "Malformed request body"),
+    INVALID_PARAMETER("REQ_003", "One or more request parameters are invalid"),
+    MISSING_PARAMETER("REQ_004", "Required request parameter is missing"),
+    METHOD_NOT_ALLOWED("REQ_005", "HTTP method is not allowed for this endpoint"),
+    DATA_INTEGRITY_VIOLATION("REQ_006", "Operation violates data integrity constraints"),
+    OPERATION_NOT_ALLOWED("REQ_007", "Operation is not allowed in current state"),
     
     // User Errors
     USER_NOT_FOUND("AUTH_006", "User record not found"),
@@ -51,4 +52,17 @@ public enum HmsErrorCode {
 
     private final String code;
     private final String defaultMessage;
+
+    HmsErrorCode(String code, String defaultMessage) {
+        this.code = code;
+        this.defaultMessage = defaultMessage;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getDefaultMessage() {
+        return defaultMessage;
+    }
 }

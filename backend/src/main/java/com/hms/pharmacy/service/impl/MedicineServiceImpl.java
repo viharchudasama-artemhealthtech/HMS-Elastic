@@ -14,6 +14,7 @@ import com.hms.pharmacy.service.InventoryService;
 import com.hms.pharmacy.service.MedicineService;
 import com.hms.pharmacy.service.search.MedicineSearchService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
@@ -99,7 +100,8 @@ public class MedicineServiceImpl implements MedicineService {
     @Override
     @Transactional(readOnly = true)
     public MedicineSliceResponseDTO getMedicinesSlice(int page, int size) {
-        var medicinesSlice = medicineRepository.findAllBy(PageRequest.of(page, size, Sort.by("name").ascending()));
+        Slice<Medicine> medicinesSlice = medicineRepository.findAllBy(
+            PageRequest.of(page, size, Sort.by("name").ascending()));
 
         return MedicineSliceResponseDTO.builder()
                 .content(medicineMapper.toDtoList(medicinesSlice.getContent()))

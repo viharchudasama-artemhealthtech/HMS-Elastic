@@ -61,6 +61,7 @@ public class MedicineSearchService {
         long startTime = System.nanoTime();
         try {
             List<String> phoneticCodes = buildPhoneticCodes(query);
+            System.out.println("Phonetic codes for '" + query + "': " + phoneticCodes);
             NativeQuery searchQuery = NativeQuery.builder()
                     .withQuery(q -> q.bool(b -> b
                             .must(m -> m.bool(should -> should

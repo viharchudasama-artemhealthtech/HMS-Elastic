@@ -2,21 +2,11 @@ package com.hms.common.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiError {
 
@@ -29,13 +19,82 @@ public class ApiError {
     private String path;
     private List<ValidationError> validationErrors;
 
+    public ApiError() {
+    }
+
+    public ApiError(boolean success, String message, String errorCode, int status, LocalDateTime timestamp, String path, List<ValidationError> validationErrors) {
+        this.success = success;
+        this.message = message;
+        this.errorCode = errorCode;
+        this.status = status;
+        this.timestamp = timestamp;
+        this.path = path;
+        this.validationErrors = validationErrors;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public List<ValidationError> getValidationErrors() {
+        return validationErrors;
+    }
+
+    public void setValidationErrors(List<ValidationError> validationErrors) {
+        this.validationErrors = validationErrors;
+    }
+
     public static ApiError of(String message, String errorCode, HttpStatus status) {
-        return ApiError.builder()
-                .success(false)
-                .message(message)
-                .errorCode(errorCode)
-                .status(status.value())
-                .timestamp(LocalDateTime.now())
-                .build();
+        ApiError error = new ApiError();
+        error.setSuccess(false);
+        error.setMessage(message);
+        error.setErrorCode(errorCode);
+        error.setStatus(status.value());
+        error.setTimestamp(LocalDateTime.now());
+        return error;
     }
 }

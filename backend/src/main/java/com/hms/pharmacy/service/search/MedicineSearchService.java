@@ -1,6 +1,6 @@
 package com.hms.pharmacy.service.search;
 
-import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import com.hms.common.exception.BadRequestException;
 import com.hms.pharmacy.dto.response.MedicineResponseDTO;
 import com.hms.pharmacy.dto.response.MedicineSuggestionDTO;
@@ -11,26 +11,37 @@ import com.hms.pharmacy.repository.MedicineRepository;
 import com.hms.pharmacy.repository.elasticsearch.MedicineSearchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.language.DoubleMetaphone;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.query.IndexQuery;
+import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class MedicineSearchService {
 
+    private static final int DEFAULT_PAGE = 0;
+    private static final int DEFAULT_SIZE = 10;
+    private static final int MAX_SEARCH_SIZE = 50;
+    private static final int REINDEX_BATCH_SIZE = 1_000;
+
+    private static final float EXACT_BOOST = 4.0f;
+    private static final float AUTOCOMPLETE_BOOST = 3.0f;
+    private static final float FUZZY_BOOST = 2.0f;
+    private static final float PHONETIC_BOOST = 1.5f;
+
     private final MedicineSearchRepository medicineSearchRepository;
     private final MedicineRepository medicineRepository;
     private final MedicineMapper medicineMapper;
     private final ElasticsearchOperations elasticsearchOperations;
-    private final DoubleMetaphone doubleMetaphone = new DoubleMetaphone();
 
     public List<MedicineResponseDTO> getActiveMedicines() {
         try {
@@ -53,37 +64,46 @@ public class MedicineSearchService {
     }
 
     public List<MedicineSuggestionDTO> searchMedicines(String keyword) {
+        return searchMedicines(keyword, DEFAULT_PAGE, DEFAULT_SIZE);
+    }
+
+    public List<MedicineSuggestionDTO> searchMedicines(String keyword, int page, int size) {
         String query = keyword == null ? "" : keyword.trim();
         if (query.isBlank()) {
             throw new BadRequestException("Search keyword is required");
         }
 
+        PageRequest pageRequest = PageRequest.of(
+                Math.max(page, DEFAULT_PAGE),
+                Math.min(Math.max(size, 1), MAX_SEARCH_SIZE));
+
         long startTime = System.nanoTime();
         try {
-            List<String> phoneticCodes = buildPhoneticCodes(query);
-            System.out.println("Phonetic codes for '" + query + "': " + phoneticCodes);
             NativeQuery searchQuery = NativeQuery.builder()
                     .withQuery(q -> q.bool(b -> b
-                            .must(m -> m.bool(should -> should
-                                    .should(s -> s.match(match -> match
-                                            .field("name")
-                                            .query(query)
-                                            .boost(3.0f)))
-                                    .should(s -> s.match(match -> match
-                                            .field("name")
-                                            .query(query)
-                                            .fuzziness("AUTO")
-                                            .boost(2.0f)))
-                                    .should(s -> s.terms(terms -> terms
-                                            .field("phoneticCodes")
-                                            .terms(values -> values.value(phoneticCodes.stream()
-                                                    .map(FieldValue::of)
-                                                    .toList()))))
-                                    .minimumShouldMatch("1")))
+                            .should(s -> s.matchPhrase(match -> match
+                                    .field("name")
+                                    .query(query)
+                                    .boost(EXACT_BOOST)))
+                            .should(s -> s.match(match -> match
+                                    .field("name.auto")
+                                    .query(query)
+                                    .boost(AUTOCOMPLETE_BOOST)))
+                            .should(s -> s.match(match -> match
+                                    .field("name")
+                                    .query(query)
+                                    .fuzziness("AUTO")
+                                    .boost(FUZZY_BOOST)))
+                            .should(s -> s.match(match -> match
+                                    .field("name.phonetic")
+                                    .query(query)
+                                    .boost(PHONETIC_BOOST)))
+                            .minimumShouldMatch("1")
                             .filter(f -> f.term(t -> t
                                     .field("isActive")
                                     .value(true)))))
-                    .withPageable(PageRequest.of(0, 10))
+                    .withPageable(pageRequest)
+                    .withSort(s -> s.score(score -> score.order(SortOrder.Desc)))
                     .build();
 
             List<MedicineSuggestionDTO> results = elasticsearchOperations.search(searchQuery, MedicineSearch.class)
@@ -97,7 +117,7 @@ public class MedicineSearchService {
         } catch (Exception ex) {
             long esFailTime = System.nanoTime();
             log.warn("Elasticsearch autocomplete failed after {} ms, using DB fallback: {}", (esFailTime - startTime) / 1_000_000, ex.getMessage());
-            List<MedicineSuggestionDTO> results = medicineRepository.searchActiveMedicines(query, PageRequest.of(0, 10)).stream()
+            List<MedicineSuggestionDTO> results = medicineRepository.searchActiveMedicines(query, pageRequest).stream()
                     .map(this::toSuggestionDto)
                     .toList();
             long dbEndTime = System.nanoTime();
@@ -128,50 +148,50 @@ public class MedicineSearchService {
 
     public void reindexAllMedicines() {
         try {
-            List<Medicine> medicines = medicineRepository.findAll();
-            List<MedicineSearch> docs = medicines.stream()
-                                                 .map(this::toSearchDocument)
-                                                 .toList();
-            medicineSearchRepository.saveAll(docs);
-            log.info("Reindex {} medicines into Elasticsearch", docs.size());
+            int page = 0;
+            long totalIndexed = 0;
+            Page<Medicine> medicines;
+
+            do {
+                medicines = medicineRepository.findAll(PageRequest.of(page, REINDEX_BATCH_SIZE));
+                List<MedicineSearch> docs = medicines.getContent().stream()
+                        .map(this::toSearchDocument)
+                        .toList();
+                bulkIndex(docs);
+                totalIndexed += docs.size();
+                page++;
+            } while (medicines.hasNext());
+
+            log.info("Reindex {} medicines into Elasticsearch", totalIndexed);
         } catch (Exception ex) {
             log.warn("Elasticsearch reindex skipped because search service is unavailable: {}", ex.getMessage());
             throw new IllegalStateException("Elasticsearch is unavailable. Start Elasticsearch and try reindex again.", ex);
         }
     }
 
+    private void bulkIndex(List<MedicineSearch> docs) {
+        if (docs.isEmpty()) {
+            return;
+        }
+
+        List<IndexQuery> queries = docs.stream()
+                .map(doc -> new IndexQueryBuilder()
+                        .withId(String.valueOf(doc.getId()))
+                        .withObject(doc)
+                        .build())
+                .toList();
+
+        elasticsearchOperations.bulkIndex(queries, MedicineSearch.class);
+    }
+
     private MedicineSearch toSearchDocument(Medicine medicine) {
         return MedicineSearch.builder()
                 .id(medicine.getId())
                 .name(medicine.getName())
-                .phoneticCodes(buildPhoneticCodes(medicine.getName()))
                 .brand(medicine.getManufacturer())
                 .stock(medicine.getQuantityInStock())
                 .isActive(medicine.getIsActive())
                 .build();
-    }
-
-    private List<String> buildPhoneticCodes(String value) {
-        if (value == null || value.isBlank()) {
-            return List.of();
-        }
-
-        String lowerValue = value.toLowerCase(Locale.ROOT);
-        return Stream.concat(
-                Arrays.stream(lowerValue.split("[^a-z0-9]+"))
-                        .filter(token -> !token.isBlank()),
-                Stream.of(lowerValue.trim())
-        )
-                .distinct()
-                .flatMap(token -> Arrays.stream(new String[]{
-                        doubleMetaphone.doubleMetaphone(token),
-                        doubleMetaphone.doubleMetaphone(token, true)
-                }))
-                .filter(Objects::nonNull)
-                .map(String::trim)
-                .filter(code -> !code.isBlank())
-                .distinct()
-                .toList();
     }
 
     private MedicineSuggestionDTO toSuggestionDto(MedicineSearch document) {

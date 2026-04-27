@@ -83,9 +83,12 @@ public class MedicineController {
 
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','PHARMACIST','NURSE')")
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<MedicineSuggestionDTO>>> search(@RequestParam("q") String keyword) {
+    public ResponseEntity<ApiResponse<List<MedicineSuggestionDTO>>> search(
+            @RequestParam("q") String keyword,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
         return ResponseEntity.ok(ApiResponse.success(
-                medicineSearchService.searchMedicines(keyword),
+                medicineSearchService.searchMedicines(keyword, page, size),
                 "Medicine search completed"));
     }
 

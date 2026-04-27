@@ -6,14 +6,14 @@ The backend keeps MySQL as the source of truth and uses Elasticsearch as a fast 
 
 ## Tech Stack
 
-| Layer | Technology |
-| --- | --- |
-| Frontend | Angular 17, RxJS, PrimeNG |
-| Backend | Spring Boot 3.3, Spring Security, Spring Data JPA |
-| Database | MySQL |
-| Search | Elasticsearch 8, Spring Data Elasticsearch |
-| Auth | JWT access token, refresh token cookie, role-based access control |
-| Mapping | MapStruct, Lombok |
+| Layer    | Technology                                                        |
+| -------- | ----------------------------------------------------------------- |
+| Frontend | Angular 17, RxJS, PrimeNG                                         |
+| Backend  | Spring Boot 3.3, Spring Security, Spring Data JPA                 |
+| Database | MySQL                                                             |
+| Search   | Elasticsearch 8, Spring Data Elasticsearch                        |
+| Auth     | JWT access token, refresh token cookie, role-based access control |
+| Mapping  | MapStruct, Lombok                                                 |
 
 ## System Architecture
 
@@ -47,39 +47,39 @@ In this project, MySQL remains the source of truth. Elasticsearch stores a searc
 
 ### 2. MySQL vs Elasticsearch
 
-| Aspect | MySQL | Elasticsearch |
-| --- | --- | --- |
-| Type | Relational database | Search and analytics engine |
-| Storage model | Tables, rows, columns | Indexes, JSON documents, fields |
-| Query language | SQL | Query DSL, JSON based |
-| Search style | Exact lookup, `LIKE` | Full-text, fuzzy, ranked |
-| Scaling | Mostly vertical, can be replicated/sharded | Horizontal by design |
-| Best use | Transactions and structured persistence | Fast search and relevance ranking |
-| Schema | Fixed schema | Mapping |
-| Search speed | Can be slow for text search at scale | Fast through inverted indexes |
+| Aspect         | MySQL                                      | Elasticsearch                     |
+| -------------- | ------------------------------------------ | --------------------------------- |
+| Type           | Relational database                        | Search and analytics engine       |
+| Storage model  | Tables, rows, columns                      | Indexes, JSON documents, fields   |
+| Query language | SQL                                        | Query DSL, JSON based             |
+| Search style   | Exact lookup, `LIKE`                       | Full-text, fuzzy, ranked          |
+| Scaling        | Mostly vertical, can be replicated/sharded | Horizontal by design              |
+| Best use       | Transactions and structured persistence    | Fast search and relevance ranking |
+| Schema         | Fixed schema                               | Mapping                           |
+| Search speed   | Can be slow for text search at scale       | Fast through inverted indexes     |
 
-| MySQL Concept | Elasticsearch Concept |
-| --- | --- |
-| Database/server | Cluster |
-| Table | Index |
-| Row/record | Document |
-| Column | Field |
-| Schema | Mapping |
-| SQL query | Query DSL |
+| MySQL Concept   | Elasticsearch Concept |
+| --------------- | --------------------- |
+| Database/server | Cluster               |
+| Table           | Index                 |
+| Row/record      | Document              |
+| Column          | Field                 |
+| Schema          | Mapping               |
+| SQL query       | Query DSL             |
 
 ### 3. Cluster Concepts
 
 An Elasticsearch cluster is a group of nodes.
 
-| Concept | Meaning | Purpose |
-| --- | --- | --- |
-| Cluster | Group of Elasticsearch nodes | Coordinates storage and search |
-| Node | One server/process in the cluster | Stores data and executes queries |
-| Index | Collection of similar documents | Similar to a table |
-| Shard | Partition of an index | Scale data and search workload |
-| Replica | Copy of a shard | Fault tolerance and read performance |
-| Document | One JSON object | One searchable record |
-| Field | Property inside a document | Searchable or filterable value |
+| Concept  | Meaning                           | Purpose                              |
+| -------- | --------------------------------- | ------------------------------------ |
+| Cluster  | Group of Elasticsearch nodes      | Coordinates storage and search       |
+| Node     | One server/process in the cluster | Stores data and executes queries     |
+| Index    | Collection of similar documents   | Similar to a table                   |
+| Shard    | Partition of an index             | Scale data and search workload       |
+| Replica  | Copy of a shard                   | Fault tolerance and read performance |
+| Document | One JSON object                   | One searchable record                |
+| Field    | Property inside a document        | Searchable or filterable value       |
 
 Flow:
 
@@ -89,15 +89,15 @@ Cluster -> Index -> Shard -> Document -> Field
 
 ### 4. Core Search Terms
 
-| Term | Explanation |
-| --- | --- |
-| Document | One JSON object stored in Elasticsearch |
-| Field | One property inside a document, such as `name` or `stock` |
-| Index | A collection of similar documents, such as medicines |
-| Token | A piece of text created during analysis |
-| Term | The final indexed value Elasticsearch actually searches |
-| Mapping | Rules for how each field is indexed and searched |
-| Analyzer | Pipeline that converts raw text into searchable terms |
+| Term     | Explanation                                               |
+| -------- | --------------------------------------------------------- |
+| Document | One JSON object stored in Elasticsearch                   |
+| Field    | One property inside a document, such as `name` or `stock` |
+| Index    | A collection of similar documents, such as medicines      |
+| Token    | A piece of text created during analysis                   |
+| Term     | The final indexed value Elasticsearch actually searches   |
+| Mapping  | Rules for how each field is indexed and searched          |
+| Analyzer | Pipeline that converts raw text into searchable terms     |
 
 Example document:
 
@@ -124,12 +124,12 @@ Doc2: Ibuprofen for pain
 
 Inverted index:
 
-| Term | Matching documents |
-| --- | --- |
-| paracetamol | Doc1 |
-| fever | Doc1 |
-| ibuprofen | Doc2 |
-| pain | Doc2 |
+| Term        | Matching documents |
+| ----------- | ------------------ |
+| paracetamol | Doc1               |
+| fever       | Doc1               |
+| ibuprofen   | Doc2               |
+| pain        | Doc2               |
 
 This makes text search fast because Elasticsearch can jump from a term to matching document IDs.
 
@@ -210,21 +210,21 @@ Search steps:
 
 BM25 decides which document is most relevant.
 
-| Scoring Part | Meaning |
-| --- | --- |
-| TF, term frequency | How often a term appears in a document |
-| IDF, inverse document frequency | How rare the term is across all documents |
-| Length normalization | Prevents long documents from unfairly winning |
-| Boost | Manual weight added to important query clauses |
+| Scoring Part                    | Meaning                                        |
+| ------------------------------- | ---------------------------------------------- |
+| TF, term frequency              | How often a term appears in a document         |
+| IDF, inverse document frequency | How rare the term is across all documents      |
+| Length normalization            | Prevents long documents from unfairly winning  |
+| Boost                           | Manual weight added to important query clauses |
 
 This project uses boosts for search behavior:
 
-| Match Type | Field | Purpose | Boost |
-| --- | --- | --- | --- |
-| Exact phrase | `name` | Prefer exact medicine names | `4.0` |
-| Autocomplete | `name.auto` | Prefix and partial typing | `3.0` |
-| Fuzzy | `name` | Typo tolerance | `2.0` |
-| Phonetic | `name.phonetic` | Sound-alike matching | `1.5` |
+| Match Type   | Field           | Purpose                     | Boost |
+| ------------ | --------------- | --------------------------- | ----- |
+| Exact phrase | `name`          | Prefer exact medicine names | `4.0` |
+| Autocomplete | `name.auto`     | Prefix and partial typing   | `3.0` |
+| Fuzzy        | `name`          | Typo tolerance              | `2.0` |
+| Phonetic     | `name.phonetic` | Sound-alike matching        | `1.5` |
 
 ### 9. Medicine Search Index Design
 
@@ -236,27 +236,27 @@ Application -> medicines alias -> medicines_v1 backing index
 
 Current search document:
 
-| Field | Type | Purpose |
-| --- | --- | --- |
-| `id` | ID | Matches the MySQL medicine ID |
-| `name` | Text | Standard full-text search |
-| `name.keyword` | Keyword | Exact aggregation/sorting capable field |
-| `name.auto` | Text | Autocomplete analyzer |
-| `name.phonetic` | Text | Double metaphone phonetic analyzer |
-| `brand` | Keyword | Manufacturer/brand display |
-| `stock` | Integer | Stock display and future scoring |
-| `isActive` | Boolean | Filter inactive medicines |
+| Field           | Type    | Purpose                                 |
+| --------------- | ------- | --------------------------------------- |
+| `id`            | ID      | Matches the MySQL medicine ID           |
+| `name`          | Text    | Standard full-text search               |
+| `name.keyword`  | Keyword | Exact aggregation/sorting capable field |
+| `name.auto`     | Text    | Autocomplete analyzer                   |
+| `name.phonetic` | Text    | Double metaphone phonetic analyzer      |
+| `brand`         | Keyword | Manufacturer/brand display              |
+| `stock`         | Integer | Stock display and future scoring        |
+| `isActive`      | Boolean | Filter inactive medicines               |
 
 ### 10. Why Alias Setup Is Required
 
 Elasticsearch does not allow major mapping changes on existing fields. Examples:
 
-| Change | Allowed on existing field? |
-| --- | --- |
-| Add a new field | Usually yes |
-| Change field type | No |
-| Change analyzer for an existing field | No |
-| Change keyword to text | No |
+| Change                                | Allowed on existing field? |
+| ------------------------------------- | -------------------------- |
+| Add a new field                       | Usually yes                |
+| Change field type                     | No                         |
+| Change analyzer for an existing field | No                         |
+| Change keyword to text                | No                         |
 
 Without an alias:
 
@@ -285,13 +285,13 @@ flowchart TD
 
 Benefits:
 
-| Problem | Alias Solution |
-| --- | --- |
-| Mapping changes require a new index | Create a new versioned index |
-| App points to physical index | App points to stable alias |
-| Deployment can cause downtime | Alias switch is instant |
-| Rollback is difficult | Point alias back to old index |
-| Code changes per index version | Backend always uses `medicines` |
+| Problem                             | Alias Solution                  |
+| ----------------------------------- | ------------------------------- |
+| Mapping changes require a new index | Create a new versioned index    |
+| App points to physical index        | App points to stable alias      |
+| Deployment can cause downtime       | Alias switch is instant         |
+| Rollback is difficult               | Point alias back to old index   |
+| Code changes per index version      | Backend always uses `medicines` |
 
 Analogy:
 
@@ -346,25 +346,25 @@ spring.elasticsearch.connection-timeout=5s
 
 What Spring Data Elasticsearch provides:
 
-| Feature | Purpose |
-| --- | --- |
-| Java client | Talks to Elasticsearch |
-| Repository support | `ElasticsearchRepository` for CRUD |
-| Document mapping | Maps Java classes to JSON documents |
-| Query DSL support | Builds full-text, fuzzy, phonetic queries |
-| Index operations | Creates mappings, settings, aliases |
-| Bulk operations | Efficient batch indexing |
+| Feature            | Purpose                                   |
+| ------------------ | ----------------------------------------- |
+| Java client        | Talks to Elasticsearch                    |
+| Repository support | `ElasticsearchRepository` for CRUD        |
+| Document mapping   | Maps Java classes to JSON documents       |
+| Query DSL support  | Builds full-text, fuzzy, phonetic queries |
+| Index operations   | Creates mappings, settings, aliases       |
+| Bulk operations    | Efficient batch indexing                  |
 
 ### 13. Current Implementation Files
 
-| File | Responsibility |
-| --- | --- |
-| `MedicineSearch.java` | Elasticsearch document mapping |
+| File                             | Responsibility                            |
+| -------------------------------- | ----------------------------------------- |
+| `MedicineSearch.java`            | Elasticsearch document mapping            |
 | `MedicineSearchIndexConfig.java` | Index settings, analyzers, mapping, alias |
-| `MedicineSearchRepository.java` | Spring Data Elasticsearch repository |
-| `MedicineSearchService.java` | Search query, fallback, indexing, reindex |
-| `MedicineController.java` | Search and reindex API endpoints |
-| `MedicineRepository.java` | MySQL fallback query |
+| `MedicineSearchRepository.java`  | Spring Data Elasticsearch repository      |
+| `MedicineSearchService.java`     | Search query, fallback, indexing, reindex |
+| `MedicineController.java`        | Search and reindex API endpoints          |
+| `MedicineRepository.java`        | MySQL fallback query                      |
 
 ### 14. Current Search Flow
 
@@ -429,15 +429,15 @@ Current implementation creates `medicines_v1` and points alias `medicines` to it
 
 For a future mapping change:
 
-| Step | Action |
-| --- | --- |
-| 1 | Create new physical index, for example `medicines_v2` |
-| 2 | Apply new settings, analyzers, and mapping |
-| 3 | Bulk reindex from MySQL into `medicines_v2` |
-| 4 | Validate search quality against `medicines_v2` |
-| 5 | Atomically switch alias `medicines` from `medicines_v1` to `medicines_v2` |
-| 6 | Keep `medicines_v1` temporarily for rollback |
-| 7 | Delete old index after verification |
+| Step | Action                                                                    |
+| ---- | ------------------------------------------------------------------------- |
+| 1    | Create new physical index, for example `medicines_v2`                     |
+| 2    | Apply new settings, analyzers, and mapping                                |
+| 3    | Bulk reindex from MySQL into `medicines_v2`                               |
+| 4    | Validate search quality against `medicines_v2`                            |
+| 5    | Atomically switch alias `medicines` from `medicines_v1` to `medicines_v2` |
+| 6    | Keep `medicines_v1` temporarily for rollback                              |
+| 7    | Delete old index after verification                                       |
 
 Rollback:
 
@@ -445,60 +445,39 @@ Rollback:
 Switch alias medicines back from medicines_v2 to medicines_v1
 ```
 
-### 18. Remaining Implementation Plan
+### 18. API Endpoints
 
-| Priority | Task | Status |
-| --- | --- | --- |
-| High | Use Elasticsearch alias instead of direct physical index | Done |
-| High | Add multi-field mapping for name | Done |
-| High | Move phonetic matching to Elasticsearch analyzer | Done |
-| High | Remove Java request-time phonetic computation | Done |
-| High | Add pagination to medicine search | Done |
-| High | Add score sorting | Done |
-| High | Replace magic boosts with constants | Done |
-| High | Use bulk indexing for reindex | Done |
-| Medium | Add function score boost for in-stock medicines | Planned |
-| Medium | Add popularity or dispense-count based ranking | Planned |
-| Medium | Add Redis cache for frequent search terms | Planned |
-| Medium | Add zero-downtime reindex endpoint that creates next version and switches alias | Planned |
-| Medium | Add integration tests with Testcontainers Elasticsearch | Planned |
-| Low | Add synonym support for common medicine names | Planned |
-| Low | Add operational dashboard for index health | Planned |
+| Endpoint                                              | Method | Purpose                                |
+| ----------------------------------------------------- | ------ | -------------------------------------- |
+| `/api/v1/medicines/search?q={keyword}&page=0&size=10` | GET    | Search medicine suggestions            |
+| `/api/v1/medicines/reindex`                           | POST   | Rebuild Elasticsearch index from MySQL |
+| `/api/v1/medicines/active`                            | GET    | Get active medicines with fallback     |
 
-### 19. API Endpoints
+### 19. Production Checklist
 
-| Endpoint | Method | Purpose |
-| --- | --- | --- |
-| `/api/v1/medicines/search?q={keyword}&page=0&size=10` | GET | Search medicine suggestions |
-| `/api/v1/medicines/reindex` | POST | Rebuild Elasticsearch index from MySQL |
-| `/api/v1/medicines/active` | GET | Get active medicines with fallback |
-
-### 20. Production Checklist
-
-| Item | Recommendation |
-| --- | --- |
-| Source of truth | Keep MySQL as source of truth |
-| Search index | Treat Elasticsearch as rebuildable |
-| Alias | App uses `medicines`, not physical index names |
-| Mapping changes | Create a new index version |
-| Reindexing | Use batches and bulk API |
-| Fallback | Keep MySQL fallback for degraded mode |
-| Observability | Log search latency and fallback events |
-| Plugin | Install `analysis-phonetic` before using phonetic analyzer |
-| Tests | Add integration tests for analyzers and ranking |
-| Rollback | Keep old index until new version is verified |
+| Item            | Recommendation                                             |
+| --------------- | ---------------------------------------------------------- |
+| Source of truth | Keep MySQL as source of truth                              |
+| Search index    | Treat Elasticsearch as rebuildable                         |
+| Alias           | App uses `medicines`, not physical index names             |
+| Mapping changes | Create a new index version                                 |
+| Reindexing      | Use batches and bulk API                                   |
+| Fallback        | Keep MySQL fallback for degraded mode                      |
+| Plugin          | Install `analysis-phonetic` before using phonetic analyzer |
+| Tests           | Add integration tests for analyzers and ranking            |
+| Rollback        | Keep old index until new version is verified               |
 
 ## Getting Started
 
 ### Prerequisites
 
-| Tool | Version |
-| --- | --- |
-| JDK | 17+ |
-| Node.js | 18+ |
-| Maven | Wrapper included in `backend/mvnw.cmd` |
-| MySQL | 8+ |
-| Elasticsearch | 8.x |
+| Tool          | Version                                |
+| ------------- | -------------------------------------- |
+| JDK           | 17+                                    |
+| Node.js       | 18+                                    |
+| Maven         | Wrapper included in `backend/mvnw.cmd` |
+| MySQL         | 8+                                     |
+| Elasticsearch | 8.x                                    |
 
 ### Backend
 
@@ -524,11 +503,11 @@ http://localhost:4200
 
 ## Reliability Notes
 
-| Concern | Current approach |
-| --- | --- |
-| Authentication | JWT with refresh token handling |
-| Authorization | Role-based method and route access |
-| Search outage | MySQL fallback path |
-| Index rebuild | Admin reindex endpoint |
-| Mapping migration | Alias-based versioning |
-| Data integrity | MySQL remains source of truth |
+| Concern           | Current approach                   |
+| ----------------- | ---------------------------------- |
+| Authentication    | JWT with refresh token handling    |
+| Authorization     | Role-based method and route access |
+| Search outage     | MySQL fallback path                |
+| Index rebuild     | Admin reindex endpoint             |
+| Mapping migration | Alias-based versioning             |
+| Data integrity    | MySQL remains source of truth      |

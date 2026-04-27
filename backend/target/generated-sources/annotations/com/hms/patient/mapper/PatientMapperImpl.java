@@ -3,14 +3,15 @@ package com.hms.patient.mapper;
 import com.hms.patient.dto.request.PatientRequestDTO;
 import com.hms.patient.dto.response.PatientResponseDTO;
 import com.hms.patient.entity.Patient;
-import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
+/*
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-04-27T17:48:54+0530",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Microsoft)"
+    date = "2026-04-27T19:22:21+0530",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.0.v20260407-0427, environment: Java 21.0.10 (Eclipse Adoptium)"
 )
+*/
 @Component
 public class PatientMapperImpl implements PatientMapper {
 
@@ -22,15 +23,15 @@ public class PatientMapperImpl implements PatientMapper {
 
         Patient patient = new Patient();
 
-        patient.setName( dto.getName() );
         patient.setAge( dto.getAge() );
         patient.setBloodGroup( dto.getBloodGroup() );
-        patient.setUrgencyLevel( dto.getUrgencyLevel() );
-        patient.setPrescription( dto.getPrescription() );
-        patient.setDose( dto.getDose() );
-        patient.setFees( dto.getFees() );
         patient.setContactNumber( dto.getContactNumber() );
+        patient.setDose( dto.getDose() );
         patient.setEmail( dto.getEmail() );
+        patient.setFees( dto.getFees() );
+        patient.setName( dto.getName() );
+        patient.setPrescription( dto.getPrescription() );
+        patient.setUrgencyLevel( dto.getUrgencyLevel() );
 
         return patient;
     }
@@ -43,18 +44,18 @@ public class PatientMapperImpl implements PatientMapper {
 
         PatientResponseDTO patientResponseDTO = new PatientResponseDTO();
 
-        patientResponseDTO.setId( patient.getId() );
-        patientResponseDTO.setName( patient.getName() );
         if ( patient.getAge() != null ) {
             patientResponseDTO.setAge( patient.getAge() );
         }
         patientResponseDTO.setBloodGroup( patient.getBloodGroup() );
-        patientResponseDTO.setPrescription( patient.getPrescription() );
+        patientResponseDTO.setContactNumber( patient.getContactNumber() );
+        patientResponseDTO.setCreatedAt( patient.getCreatedAt() );
         patientResponseDTO.setDose( patient.getDose() );
         patientResponseDTO.setFees( patient.getFees() );
-        patientResponseDTO.setContactNumber( patient.getContactNumber() );
+        patientResponseDTO.setId( patient.getId() );
+        patientResponseDTO.setName( patient.getName() );
+        patientResponseDTO.setPrescription( patient.getPrescription() );
         patientResponseDTO.setUrgencyLevel( patient.getUrgencyLevel() );
-        patientResponseDTO.setCreatedAt( patient.getCreatedAt() );
 
         return patientResponseDTO;
     }
@@ -65,14 +66,14 @@ public class PatientMapperImpl implements PatientMapper {
             return;
         }
 
-        patient.setName( dto.getName() );
         patient.setAge( dto.getAge() );
         patient.setBloodGroup( dto.getBloodGroup() );
-        patient.setUrgencyLevel( dto.getUrgencyLevel() );
-        patient.setPrescription( dto.getPrescription() );
-        patient.setDose( dto.getDose() );
-        patient.setFees( dto.getFees() );
         patient.setContactNumber( dto.getContactNumber() );
+        patient.setDose( dto.getDose() );
         patient.setEmail( dto.getEmail() );
+        patient.setFees( dto.getFees() );
+        patient.setName( dto.getName() );
+        patient.setPrescription( dto.getPrescription() );
+        patient.setUrgencyLevel( dto.getUrgencyLevel() );
     }
 }

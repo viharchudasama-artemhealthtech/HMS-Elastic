@@ -5,14 +5,15 @@ import com.hms.pharmacy.dto.response.MedicineResponseDTO;
 import com.hms.pharmacy.entity.Medicine;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
+/*
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-04-27T17:48:54+0530",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Microsoft)"
+    date = "2026-04-27T19:22:23+0530",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.0.v20260407-0427, environment: Java 21.0.10 (Eclipse Adoptium)"
 )
+*/
 @Component
 public class MedicineMapperImpl implements MedicineMapper {
 
@@ -24,17 +25,17 @@ public class MedicineMapperImpl implements MedicineMapper {
 
         Medicine medicine = new Medicine();
 
-        medicine.setName( dto.getName() );
-        medicine.setMedicineCode( dto.getMedicineCode() );
-        medicine.setDescription( dto.getDescription() );
         medicine.setCategory( dto.getCategory() );
-        medicine.setManufacturer( dto.getManufacturer() );
-        medicine.setExpiryDate( dto.getExpiryDate() );
-        medicine.setQuantityInStock( dto.getQuantityInStock() );
-        medicine.setUnitPrice( dto.getUnitPrice() );
-        medicine.setReorderLevel( dto.getReorderLevel() );
+        medicine.setDescription( dto.getDescription() );
         medicine.setDosage( dto.getDosage() );
+        medicine.setExpiryDate( dto.getExpiryDate() );
         medicine.setIsActive( dto.getIsActive() );
+        medicine.setManufacturer( dto.getManufacturer() );
+        medicine.setMedicineCode( dto.getMedicineCode() );
+        medicine.setName( dto.getName() );
+        medicine.setQuantityInStock( dto.getQuantityInStock() );
+        medicine.setReorderLevel( dto.getReorderLevel() );
+        medicine.setUnitPrice( dto.getUnitPrice() );
 
         return medicine;
     }
@@ -47,21 +48,21 @@ public class MedicineMapperImpl implements MedicineMapper {
 
         MedicineResponseDTO medicineResponseDTO = new MedicineResponseDTO();
 
+        medicineResponseDTO.setCategory( entity.getCategory() );
+        medicineResponseDTO.setCreatedAt( entity.getCreatedAt() );
+        medicineResponseDTO.setDescription( entity.getDescription() );
+        medicineResponseDTO.setDosage( entity.getDosage() );
+        medicineResponseDTO.setExpiryDate( entity.getExpiryDate() );
         if ( entity.getId() != null ) {
             medicineResponseDTO.setId( String.valueOf( entity.getId() ) );
         }
-        medicineResponseDTO.setName( entity.getName() );
-        medicineResponseDTO.setMedicineCode( entity.getMedicineCode() );
-        medicineResponseDTO.setDescription( entity.getDescription() );
-        medicineResponseDTO.setCategory( entity.getCategory() );
-        medicineResponseDTO.setManufacturer( entity.getManufacturer() );
-        medicineResponseDTO.setExpiryDate( entity.getExpiryDate() );
-        medicineResponseDTO.setQuantityInStock( entity.getQuantityInStock() );
-        medicineResponseDTO.setUnitPrice( entity.getUnitPrice() );
-        medicineResponseDTO.setReorderLevel( entity.getReorderLevel() );
-        medicineResponseDTO.setDosage( entity.getDosage() );
         medicineResponseDTO.setIsActive( entity.getIsActive() );
-        medicineResponseDTO.setCreatedAt( entity.getCreatedAt() );
+        medicineResponseDTO.setManufacturer( entity.getManufacturer() );
+        medicineResponseDTO.setMedicineCode( entity.getMedicineCode() );
+        medicineResponseDTO.setName( entity.getName() );
+        medicineResponseDTO.setQuantityInStock( entity.getQuantityInStock() );
+        medicineResponseDTO.setReorderLevel( entity.getReorderLevel() );
+        medicineResponseDTO.setUnitPrice( entity.getUnitPrice() );
         medicineResponseDTO.setUpdatedAt( entity.getUpdatedAt() );
 
         return medicineResponseDTO;
@@ -73,17 +74,17 @@ public class MedicineMapperImpl implements MedicineMapper {
             return;
         }
 
-        entity.setName( dto.getName() );
-        entity.setMedicineCode( dto.getMedicineCode() );
-        entity.setDescription( dto.getDescription() );
         entity.setCategory( dto.getCategory() );
-        entity.setManufacturer( dto.getManufacturer() );
-        entity.setExpiryDate( dto.getExpiryDate() );
-        entity.setQuantityInStock( dto.getQuantityInStock() );
-        entity.setUnitPrice( dto.getUnitPrice() );
-        entity.setReorderLevel( dto.getReorderLevel() );
+        entity.setDescription( dto.getDescription() );
         entity.setDosage( dto.getDosage() );
+        entity.setExpiryDate( dto.getExpiryDate() );
         entity.setIsActive( dto.getIsActive() );
+        entity.setManufacturer( dto.getManufacturer() );
+        entity.setMedicineCode( dto.getMedicineCode() );
+        entity.setName( dto.getName() );
+        entity.setQuantityInStock( dto.getQuantityInStock() );
+        entity.setReorderLevel( dto.getReorderLevel() );
+        entity.setUnitPrice( dto.getUnitPrice() );
     }
 
     @Override

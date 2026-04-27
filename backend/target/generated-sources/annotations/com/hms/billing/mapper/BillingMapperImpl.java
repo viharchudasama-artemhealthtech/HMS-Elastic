@@ -10,14 +10,15 @@ import com.hms.billing.entity.BillingItem;
 import com.hms.patient.entity.Patient;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
+/*
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-04-27T17:48:53+0530",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.18 (Microsoft)"
+    date = "2026-04-27T19:22:22+0530",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.0.v20260407-0427, environment: Java 21.0.10 (Eclipse Adoptium)"
 )
+*/
 @Component
 public class BillingMapperImpl implements BillingMapper {
 
@@ -29,20 +30,20 @@ public class BillingMapperImpl implements BillingMapper {
 
         Billing billing = new Billing();
 
-        billing.setTotalAmount( dto.getTotalAmount() );
-        billing.setTaxAmount( dto.getTaxAmount() );
-        billing.setDiscountAmount( dto.getDiscountAmount() );
-        billing.setNetAmount( dto.getNetAmount() );
-        billing.setPaymentStatus( dto.getPaymentStatus() );
-        billing.setPaymentMethod( dto.getPaymentMethod() );
         billing.setBillingDate( dto.getBillingDate() );
+        billing.setDiscountAmount( dto.getDiscountAmount() );
         billing.setDueDate( dto.getDueDate() );
-        billing.setNotes( dto.getNotes() );
-        billing.setInsuranceProvider( dto.getInsuranceProvider() );
-        billing.setInsuranceClaimNumber( dto.getInsuranceClaimNumber() );
         billing.setInsuranceAmount( dto.getInsuranceAmount() );
+        billing.setInsuranceClaimNumber( dto.getInsuranceClaimNumber() );
+        billing.setInsuranceProvider( dto.getInsuranceProvider() );
         billing.setInsuranceStatus( dto.getInsuranceStatus() );
         billing.setItems( billingItemRequestDTOListToBillingItemList( dto.getItems() ) );
+        billing.setNetAmount( dto.getNetAmount() );
+        billing.setNotes( dto.getNotes() );
+        billing.setPaymentMethod( dto.getPaymentMethod() );
+        billing.setPaymentStatus( dto.getPaymentStatus() );
+        billing.setTaxAmount( dto.getTaxAmount() );
+        billing.setTotalAmount( dto.getTotalAmount() );
 
         return billing;
     }
@@ -58,19 +59,19 @@ public class BillingMapperImpl implements BillingMapper {
         billingResponseDTO.setPatientId( entityPatientId( entity ) );
         billingResponseDTO.setPatientName( entityPatientName( entity ) );
         billingResponseDTO.setAppointmentId( entityAppointmentId( entity ) );
+        billingResponseDTO.setBillingDate( entity.getBillingDate() );
+        billingResponseDTO.setCreatedAt( entity.getCreatedAt() );
+        billingResponseDTO.setDiscountAmount( entity.getDiscountAmount() );
+        billingResponseDTO.setDueDate( entity.getDueDate() );
         billingResponseDTO.setId( entity.getId() );
         billingResponseDTO.setInvoiceNumber( entity.getInvoiceNumber() );
-        billingResponseDTO.setTotalAmount( entity.getTotalAmount() );
-        billingResponseDTO.setTaxAmount( entity.getTaxAmount() );
-        billingResponseDTO.setDiscountAmount( entity.getDiscountAmount() );
-        billingResponseDTO.setNetAmount( entity.getNetAmount() );
-        billingResponseDTO.setPaymentStatus( entity.getPaymentStatus() );
-        billingResponseDTO.setPaymentMethod( entity.getPaymentMethod() );
-        billingResponseDTO.setBillingDate( entity.getBillingDate() );
-        billingResponseDTO.setDueDate( entity.getDueDate() );
-        billingResponseDTO.setNotes( entity.getNotes() );
         billingResponseDTO.setItems( billingItemListToBillingItemResponseDTOList( entity.getItems() ) );
-        billingResponseDTO.setCreatedAt( entity.getCreatedAt() );
+        billingResponseDTO.setNetAmount( entity.getNetAmount() );
+        billingResponseDTO.setNotes( entity.getNotes() );
+        billingResponseDTO.setPaymentMethod( entity.getPaymentMethod() );
+        billingResponseDTO.setPaymentStatus( entity.getPaymentStatus() );
+        billingResponseDTO.setTaxAmount( entity.getTaxAmount() );
+        billingResponseDTO.setTotalAmount( entity.getTotalAmount() );
 
         return billingResponseDTO;
     }
@@ -100,8 +101,8 @@ public class BillingMapperImpl implements BillingMapper {
         billingItemResponseDTO.setId( entity.getId() );
         billingItemResponseDTO.setItemName( entity.getItemName() );
         billingItemResponseDTO.setQuantity( entity.getQuantity() );
-        billingItemResponseDTO.setUnitPrice( entity.getUnitPrice() );
         billingItemResponseDTO.setTotalValue( entity.getTotalValue() );
+        billingItemResponseDTO.setUnitPrice( entity.getUnitPrice() );
 
         return billingItemResponseDTO;
     }
@@ -116,8 +117,8 @@ public class BillingMapperImpl implements BillingMapper {
 
         billingItem.setItemName( dto.getItemName() );
         billingItem.setQuantity( dto.getQuantity() );
-        billingItem.setUnitPrice( dto.getUnitPrice() );
         billingItem.setTotalValue( dto.getTotalValue() );
+        billingItem.setUnitPrice( dto.getUnitPrice() );
 
         return billingItem;
     }

@@ -37,6 +37,7 @@ public class MedicineSearchService {
     private static final float AUTOCOMPLETE_BOOST = 3.0f;
     private static final float FUZZY_BOOST = 2.0f;
     private static final float PHONETIC_BOOST = 1.5f;
+    private static final float BROAD_FUZZY_BOOST = 0.8f;
 
     private final MedicineSearchRepository medicineSearchRepository;
     private final MedicineRepository medicineRepository;
@@ -94,6 +95,13 @@ public class MedicineSearchService {
                                     .query(query)
                                     .fuzziness("AUTO")
                                     .boost(FUZZY_BOOST)))
+                            .should(s -> s.match(match -> match
+                                    .field("name")
+                                    .query(query)
+                                    .fuzziness("2")
+                                    .prefixLength(2)
+                                    .maxExpansions(50)
+                                    .boost(BROAD_FUZZY_BOOST)))
                             .should(s -> s.match(match -> match
                                     .field("name.phonetic")
                                     .query(query)

@@ -23,8 +23,7 @@ flowchart TD
     API --> AUTH[Spring Security + JWT]
     API --> MYSQL[(MySQL)]
     API --> SEARCH[MedicineSearchService]
-    SEARCH --> ES_ALIAS[Elasticsearch alias: medicines]
-    ES_ALIAS --> ES_INDEX[Backing index: medicines_v1]
+    SEARCH --> ES_INDEX[Elasticsearch index: medicines]
     SEARCH --> MYSQL_FALLBACK[(MySQL fallback)]
 ```
 
@@ -228,10 +227,10 @@ This project uses boosts for search behavior:
 
 ### 9. Medicine Search Index Design
 
-The application uses a stable alias:
+The application uses a single Elasticsearch index:
 
 ```text
-Application -> medicines alias -> medicines_v1 backing index
+Application -> medicines index
 ```
 
 Current search document:
@@ -247,7 +246,7 @@ Current search document:
 | `stock`         | Integer | Stock display and future scoring        |
 | `isActive`      | Boolean | Filter inactive medicines               |
 
-### 10. Why Alias Setup Is Required
+### 10. Mapping Change Strategy
 
 Elasticsearch does not allow major mapping changes on existing fields. Examples:
 
@@ -258,49 +257,7 @@ Elasticsearch does not allow major mapping changes on existing fields. Examples:
 | Change analyzer for an existing field | No                         |
 | Change keyword to text                | No                         |
 
-Without an alias:
-
-```text
-App -> medicines_v1
-```
-
-When creating `medicines_v2`, code must change from `medicines_v1` to `medicines_v2`, which creates downtime and rollback risk.
-
-With an alias:
-
-```text
-App -> medicines -> medicines_v1
-```
-
-Upgrade flow:
-
-```mermaid
-flowchart TD
-    A[App uses alias: medicines] --> B[Current index: medicines_v1]
-    C[Create new index: medicines_v2] --> D[Reindex data into medicines_v2]
-    D --> E[Atomically switch alias]
-    E --> F[App uses medicines alias]
-    F --> G[New index: medicines_v2]
-```
-
-Benefits:
-
-| Problem                             | Alias Solution                  |
-| ----------------------------------- | ------------------------------- |
-| Mapping changes require a new index | Create a new versioned index    |
-| App points to physical index        | App points to stable alias      |
-| Deployment can cause downtime       | Alias switch is instant         |
-| Rollback is difficult               | Point alias back to old index   |
-| Code changes per index version      | Backend always uses `medicines` |
-
-Analogy:
-
-```text
-Alias = domain name
-Index = server IP
-
-Users keep using the domain while infrastructure changes behind it.
-```
+For local development, delete and recreate the `medicines` index after mapping or analyzer changes, then run the reindex endpoint to rebuild documents from MySQL.
 
 ### 11. Local Development Setup
 
@@ -352,7 +309,7 @@ What Spring Data Elasticsearch provides:
 | Repository support | `ElasticsearchRepository` for CRUD        |
 | Document mapping   | Maps Java classes to JSON documents       |
 | Query DSL support  | Builds full-text, fuzzy, phonetic queries |
-| Index operations   | Creates mappings, settings, aliases       |
+| Index operations   | Creates mappings and settings             |
 | Bulk operations    | Efficient batch indexing                  |
 
 ### 13. Current Implementation Files
@@ -360,7 +317,7 @@ What Spring Data Elasticsearch provides:
 | File                             | Responsibility                            |
 | -------------------------------- | ----------------------------------------- |
 | `MedicineSearch.java`            | Elasticsearch document mapping            |
-| `MedicineSearchIndexConfig.java` | Index settings, analyzers, mapping, alias |
+| `MedicineSearchIndexConfig.java` | Index settings, analyzers, and mapping    |
 | `MedicineSearchRepository.java`  | Spring Data Elasticsearch repository      |
 | `MedicineSearchService.java`     | Search query, fallback, indexing, reindex |
 | `MedicineController.java`        | Search and reindex API endpoints          |
@@ -374,9 +331,8 @@ flowchart TD
     B --> C[MedicineController]
     C --> D[MedicineSearchService]
     D --> E{Elasticsearch available?}
-    E -->|Yes| F[Search alias: medicines]
-    F --> G[Backing index: medicines_v1]
-    G --> H[Return ranked suggestions]
+    E -->|Yes| F[Search medicines index]
+    F --> H[Return ranked suggestions]
     E -->|No| I[MySQL fallback search]
     I --> H
 ```
@@ -389,7 +345,7 @@ sequenceDiagram
     participant API as Medicine API
     participant DB as MySQL
     participant Search as MedicineSearchService
-    participant ES as Elasticsearch alias medicines
+    participant ES as Elasticsearch medicines index
 
     API->>DB: Create or update medicine
     DB-->>API: Saved Medicine entity
@@ -423,27 +379,19 @@ sequenceDiagram
     Search-->>API: Reindex completed
 ```
 
-### 17. Production Reindex and Alias Switch Plan
+### 17. Reindex Plan
 
-Current implementation creates `medicines_v1` and points alias `medicines` to it.
+Current implementation creates the `medicines` index directly.
 
-For a future mapping change:
+For a mapping or analyzer change:
 
-| Step | Action                                                                    |
-| ---- | ------------------------------------------------------------------------- |
-| 1    | Create new physical index, for example `medicines_v2`                     |
-| 2    | Apply new settings, analyzers, and mapping                                |
-| 3    | Bulk reindex from MySQL into `medicines_v2`                               |
-| 4    | Validate search quality against `medicines_v2`                            |
-| 5    | Atomically switch alias `medicines` from `medicines_v1` to `medicines_v2` |
-| 6    | Keep `medicines_v1` temporarily for rollback                              |
-| 7    | Delete old index after verification                                       |
-
-Rollback:
-
-```text
-Switch alias medicines back from medicines_v2 to medicines_v1
-```
+| Step | Action                                             |
+| ---- | -------------------------------------------------- |
+| 1    | Stop writes that update the search index           |
+| 2    | Delete the existing `medicines` index              |
+| 3    | Restart the backend so index settings are recreated |
+| 4    | Run the reindex endpoint to rebuild from MySQL     |
+| 5    | Validate search quality                            |
 
 ### 18. API Endpoints
 
@@ -459,8 +407,7 @@ Switch alias medicines back from medicines_v2 to medicines_v1
 | --------------- | ---------------------------------------------------------- |
 | Source of truth | Keep MySQL as source of truth                              |
 | Search index    | Treat Elasticsearch as rebuildable                         |
-| Alias           | App uses `medicines`, not physical index names             |
-| Mapping changes | Create a new index version                                 |
+| Mapping changes | Recreate the search index and reindex from MySQL           |
 | Reindexing      | Use batches and bulk API                                   |
 | Fallback        | Keep MySQL fallback for degraded mode                      |
 | Plugin          | Install `analysis-phonetic` before using phonetic analyzer |
@@ -509,5 +456,5 @@ http://localhost:4200
 | Authorization     | Role-based method and route access |
 | Search outage     | MySQL fallback path                |
 | Index rebuild     | Admin reindex endpoint             |
-| Mapping migration | Alias-based versioning             |
+| Mapping migration | Recreate and reindex Elasticsearch |
 | Data integrity    | MySQL remains source of truth      |
